@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import statusInvest from './status-invest';
-import { RECUPERACAO_JUDICIAL } from './recuperacaoJudicial'
-import getMediaMovel from './getMediaMovel'
+import axios from 'axios';
 
-import * as _ from 'lodash';
-
+const API = 'https://ibovespa-on-sale-ibr11mmad-jvgoulartalmeida.vercel.app';
 
 export default function App() {
   const [columns, setColumns] = useState([]);
   const [rows, setRow] = useState([]);
 
-  const [ibovData, setIbov] = useState([]);
-  const [ibovDataFiltered, setIbovFiltered] = useState([]);
+  const [, setIbovFiltered] = useState([]);
 
   const buildTable = (data) => {
     const columnsData = Object.keys(data[0]).map((value) => ({
@@ -27,37 +23,17 @@ export default function App() {
     setRow(rowData)
   }
 
-  const filterIbovData = async (data) => {
-
-    const filtered = data.filter(stock => {
-      return stock['Liquidez Média Diária'] > 1000000 &&
-        stock['Margem Ebit'] > 0 &&
-        stock['Dividend Yield'] > 6 &&
-        stock['Cotação'] < (((stock['Dividend Yield'] / 100) * stock['Cotação']) / 0.06) &&
-        !RECUPERACAO_JUDICIAL.includes(stock.Ativo);
-    });
-
-    const sorted = _.orderBy(filtered, ['EV/EBIT', 'Liquidez Média Diária'], ['asc', 'desc']);
-    const uniqueSorted = _.slice(_.uniqBy(sorted, a => a.Empresa), 0, 50)
-    const finalStocks = await Promise.all(uniqueSorted.map(async (item) => {
-      const medias = await getMediaMovel(item.Ativo);
-      return {
-        ...item,
-        ...medias
-      }
-    }))
-
-    buildTable(finalStocks);
-
-    setIbov(data);
-    setIbovFiltered(finalStocks)
+  const getStocksInfo = async () => {
+    return axios.get(`${API}/api/ibovespa/filtered`);
   }
-
 
   useEffect(() => {
     const fetchIbov = async () => {
-      const data = await statusInvest.getStocksInfo();
-      await filterIbovData(data);
+      const { data } = await getStocksInfo();
+      console.log(data)
+      buildTable(data);
+      setIbovFiltered(data);
+
     }
 
     fetchIbov();

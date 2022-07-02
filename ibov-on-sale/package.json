@@ -2,7 +2,7 @@
   "name": "ibov-on-sale",
   "version": "0.1.0",
   "homepage": "https://goulartt.github.io/ibovespa-on-sale/",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -13,8 +13,6 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "gh-pages": "^4.0.0",
-    "lodash": "^4.17.21",
-    "moving-averages": "^4.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
