@@ -36,10 +36,10 @@ const getHistoricalData = async function (ticker) {
     return quotes;
 };
 
-module.exports.getMediaMovel = async function (ticker) {
+const getMediaMovel = async function (ticker) {
     try {
         const quotes = await getHistoricalData(ticker);
-        
+
         return {
             MA5: avg.ma(quotes.map(quote => quote.close).slice(quotes.length - 6, quotes.length), 5)[5],
             MA10: avg.ma(quotes.map(quote => quote.close).slice(quotes.length - 11, quotes.length), 10)[10],
@@ -53,3 +53,5 @@ module.exports.getMediaMovel = async function (ticker) {
     }
 
 };
+
+export default getMediaMovel;
