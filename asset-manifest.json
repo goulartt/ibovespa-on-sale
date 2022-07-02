@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ibovespa-on-sale/static/css/main.e6c13ad2.css",
+    "main.js": "/ibovespa-on-sale/static/js/main.f7ce2fa4.js",
+    "index.html": "/ibovespa-on-sale/index.html",
+    "main.e6c13ad2.css.map": "/ibovespa-on-sale/static/css/main.e6c13ad2.css.map",
+    "main.f7ce2fa4.js.map": "/ibovespa-on-sale/static/js/main.f7ce2fa4.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.f7ce2fa4.js"
+  ]
+}
