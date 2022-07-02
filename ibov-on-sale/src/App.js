@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import statusInvest from 'statusinvest';
 import { RECUPERACAO_JUDICIAL } from './recuperacaoJudicial'
-import { getMediaMovel } from './getMediaMovel'
+import getMediaMovel from './getMediaMovel'
 
 import * as _ from 'lodash';
 
