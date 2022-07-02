@@ -9,7 +9,7 @@ const getHistoricalData = async function (ticker) {
     lastYear.setDate(lastYear.getDate() - 365);
 
     const { data } = await axios.get(
-        `https://query1.finance.yahoo.com/v7/finance/download/${ticker}.SA?period1=${Math.round(
+        `http://cors.io/?https://query1.finance.yahoo.com/v7/finance/download/${ticker}.SA?period1=${Math.round(
             lastYear.getTime() / 1000
         )}&period2=${Math.round(
             yesterday.getTime() / 1000

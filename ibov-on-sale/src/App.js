@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import statusInvest from 'statusinvest';
+import statusInvest from './status-invest';
 import { RECUPERACAO_JUDICIAL } from './recuperacaoJudicial'
 import getMediaMovel from './getMediaMovel'
 
