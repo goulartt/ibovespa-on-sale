@@ -11,6 +11,7 @@ import Summary from './components/Summary';
 import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
 import SortSelector from './components/SortSelector';
+import SectorFilter, { ALL_SECTORS, filterBySector } from './components/SectorFilter';
 
 function useRanking(sort) {
   const [state, setState] = useState({ stocks: [], updatedAt: null, loading: true, error: null });
@@ -54,7 +55,9 @@ function Header({ updatedAt }) {
 export default function App() {
   const [sort, setSort] = useState(SORTS.evEbit);
   const { stocks, updatedAt, loading, error, retry } = useRanking(sort);
-  const rows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
+  const [sector, setSector] = useState(ALL_SECTORS);
+  const allRows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
+  const rows = useMemo(() => filterBySector(allRows, sector), [allRows, sector]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -71,15 +74,18 @@ export default function App() {
             </Alert>
           ) : (
             <Stack spacing={{ xs: 4, md: 5 }}>
-              <SortSelector value={sort} onChange={setSort} disabled={loading} />
+              <Stack spacing={2}>
+                <SortSelector value={sort} onChange={setSort} disabled={loading} />
+                {!loading && <SectorFilter stocks={allRows} value={sector} onChange={setSector} />}
+              </Stack>
               {!loading && rows.length === 0 ? (
                 <Alert severity="info">
                   Nenhuma ação passou em todos os filtros hoje. Veja os critérios em “Como a lista é montada”.
                 </Alert>
               ) : (
                 <>
-                  <PriceTags stocks={rows} loading={loading} />
-                  <Summary stocks={rows} loading={loading} />
+                  <PriceTags stocks={rows} loading={loading} sector={sector} />
+                  <Summary stocks={rows} loading={loading} sector={sector} />
                   <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
                     <StocksTable stocks={rows} loading={loading} />
                   </Paper>

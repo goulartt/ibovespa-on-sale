@@ -10,6 +10,7 @@ const CRITERIA = [
   ['Lucro', 'lucro em todos os últimos balanços anuais (pelo menos 3) e nos últimos 12 meses, com margem EBIT positiva'],
   ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT'],
   ['Situação', 'ficam de fora as empresas em recuperação judicial ou extrajudicial, falência ou liquidação, segundo o cadastro da CVM'],
+  ['Setores', 'os setores de atividade informados à CVM são agrupados em 6: Energia e saneamento, Commodities, Construção e imóveis, Financeiro, Consumo e Indústria e serviços'],
   ['Ordenação', 'do menor para o maior EV/EBIT, ou pela Fórmula Mágica, que soma a posição no EV/EBIT (mais barata) com a posição no ROIC (melhor negócio); uma ação por empresa, a mais negociada'],
 ];
 

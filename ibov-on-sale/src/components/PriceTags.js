@@ -8,11 +8,11 @@ import { companyName } from '../lib/names';
 const TILTS = ['-1.6deg', '0.9deg', '-0.6deg'];
 
 // The top of the ranking presented as supermarket price tags: the "price" is the EV/EBIT.
-function Tag({ stock, index, loading }) {
+function Tag({ stock, index, loading, sector }) {
   return (
     <Box
       component="article"
-      aria-label={stock ? `${index + 1}º lugar: ${stock.Ativo}` : undefined}
+      aria-label={stock ? `${index + 1}º ${sector ? `em ${sector}` : 'lugar'}: ${stock.Ativo}` : undefined}
       sx={{
         position: 'relative',
         bgcolor: tokens.offer,
@@ -28,7 +28,7 @@ function Tag({ stock, index, loading }) {
       }}
     >
       <Typography sx={{ fontFamily: displayFont, fontWeight: 700, fontSize: 18 }}>
-        {index + 1}º lugar
+        {index + 1}º {sector ? `em ${sector}` : 'lugar'}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mt: 1 }}>
         {loading ? <Skeleton variant="rounded" width={32} height={32} /> : <TickerLogo ticker={stock.Ativo} size={32} />}
@@ -55,7 +55,7 @@ function Tag({ stock, index, loading }) {
   );
 }
 
-export default function PriceTags({ stocks, loading }) {
+export default function PriceTags({ stocks, loading, sector }) {
   const top = loading ? [null, null, null] : stocks.slice(0, 3);
   if (!top.length) return null;
   return (
@@ -65,7 +65,7 @@ export default function PriceTags({ stocks, loading }) {
       sx={{ display: 'grid', gap: { xs: 2, sm: 3 }, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, maxWidth: 1040 }}
     >
       {top.map((stock, index) => (
-        <Tag key={stock ? stock.Ativo : index} stock={stock} index={index} loading={loading} />
+        <Tag key={stock ? stock.Ativo : index} stock={stock} index={index} loading={loading} sector={sector} />
       ))}
     </Box>
   );

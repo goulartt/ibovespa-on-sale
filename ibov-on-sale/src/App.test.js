@@ -10,8 +10,9 @@ jest.mock('./lib/api', () => ({
 }));
 
 const STOCKS = [
-  { Ranking: 1, Ativo: 'AAAA3', Empresa: 'EMPRESA A S.A.', 'Cotação': 10, 'Dividend Yield': 12, 'EV/EBIT': 2, MA200: 8 },
-  { Ranking: 2, Ativo: 'BBBB4', Empresa: 'EMPRESA B S.A.', 'Cotação': 20, 'Dividend Yield': 8, 'EV/EBIT': 4, MA200: 25 },
+  { Ranking: 1, Ativo: 'AAAA3', Empresa: 'EMPRESA A S.A.', Setor: 'Consumo', 'Cotação': 10, 'Dividend Yield': 12, 'EV/EBIT': 2, MA200: 8 },
+  { Ranking: 2, Ativo: 'BBBB4', Empresa: 'EMPRESA B S.A.', Setor: 'Financeiro', 'Cotação': 20, 'Dividend Yield': 8, 'EV/EBIT': 4, MA200: 25 },
+  { Ranking: 3, Ativo: 'CCCC3', Empresa: 'EMPRESA C S.A.', Setor: 'Financeiro', 'Cotação': 5, 'Dividend Yield': 10, 'EV/EBIT': 6, MA200: 5 },
 ];
 
 afterEach(() => jest.clearAllMocks());
@@ -25,8 +26,8 @@ test('shows the summary and the ranking', async () => {
   expect(screen.getByText('Empresa A')).toBeInTheDocument(); // readable company name on the tag
   expect(screen.getByText('Ibovespa em Promoção')).toBeInTheDocument();
   expect(screen.getByText(/Atualizado em 05\/11\/2026/)).toBeInTheDocument();
-  expect(screen.getByText('10,00%')).toBeInTheDocument(); // average DY in the summary
-  expect(screen.getByText('3,00x')).toBeInTheDocument(); // median EV/EBIT
+  expect(screen.getAllByText('10,00%').length).toBeGreaterThan(0); // average DY in the summary
+  expect(screen.getAllByText('4,00x').length).toBeGreaterThan(0); // median EV/EBIT
 });
 
 test('switching to the magic formula fetches the ranking again', async () => {
@@ -36,6 +37,23 @@ test('switching to the magic formula fetches the ranking again', async () => {
 
   userEvent.click(screen.getByRole('button', { name: /Fórmula Mágica/ }));
   await waitFor(() => expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'magicFormula' })));
+});
+
+test('filters the ranking by sector', async () => {
+  fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: null });
+  render(<App />);
+  await screen.findByRole('article', { name: '1º lugar: AAAA3' });
+
+  expect(screen.getByRole('button', { name: 'Todos (3)' })).toHaveAttribute('aria-pressed', 'true');
+  userEvent.click(screen.getByRole('button', { name: 'Financeiro (2)' }));
+
+  expect(screen.getByRole('article', { name: '1º em Financeiro: BBBB4' })).toBeInTheDocument();
+  expect(screen.getByRole('article', { name: '2º em Financeiro: CCCC3' })).toBeInTheDocument();
+  expect(screen.queryByRole('article', { name: /AAAA3/ })).not.toBeInTheDocument();
+  expect(screen.getByText(/de Financeiro passaram em todos os filtros/)).toBeInTheDocument();
+
+  userEvent.click(screen.getByRole('button', { name: 'Todos (3)' }));
+  expect(screen.getByRole('article', { name: '1º lugar: AAAA3' })).toBeInTheDocument();
 });
 
 test('explains when no stock passes the filters', async () => {

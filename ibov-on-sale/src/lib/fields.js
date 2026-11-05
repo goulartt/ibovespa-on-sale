@@ -17,6 +17,13 @@ export const FIELDS = [
     description: 'Código de negociação na B3, logo e nome da empresa. Quando a empresa tem mais de uma classe de ação, aparece a mais negociada.',
   },
   {
+    field: 'Setor',
+    label: 'Setor',
+    format: 'text',
+    width: 170,
+    description: 'Setor da empresa, a partir do setor de atividade informado à CVM, agrupado em 6 grandes setores: Energia e saneamento, Commodities, Construção e imóveis, Financeiro, Consumo e Indústria e serviços.',
+  },
+  {
     field: 'Empresa',
     label: 'Empresa',
     format: 'text',

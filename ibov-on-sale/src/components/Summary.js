@@ -21,12 +21,12 @@ export function summarize(stocks) {
 }
 
 // One plain sentence instead of a row of stat cards.
-export default function Summary({ stocks, loading }) {
+export default function Summary({ stocks, loading, sector }) {
   if (loading) return <Skeleton width="60%" sx={{ fontSize: 18 }} />;
   const s = summarize(stocks);
   return (
     <Typography sx={{ fontSize: 18, maxWidth: '70ch' }}>
-      <strong>{s.count} ações</strong> passaram em todos os filtros. Juntas, têm dividend yield médio
+      <strong>{s.count} {s.count === 1 ? 'ação' : 'ações'}</strong>{sector ? ` de ${sector}` : ''} {s.count === 1 ? 'passou' : 'passaram'} em todos os filtros. Juntas, têm dividend yield médio
       de <strong>{formatPercent(s.averageDy)}</strong> e EV/EBIT mediano de <strong>{formatMultiple(s.medianEvEbit)}</strong>.
     </Typography>
   );

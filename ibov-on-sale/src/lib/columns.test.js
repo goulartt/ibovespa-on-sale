@@ -3,7 +3,7 @@ import { FIELDS, withDerivedFields } from './fields';
 
 // Every field currently returned by GET /api/ibovespa/filtered.
 const API_FIELDS = [
-  'Ranking', 'Ativo', 'Empresa', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
+  'Ranking', 'Ativo', 'Empresa', 'Setor', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
   'Liquidez Média Diária', 'Data Balanço', 'Situação', 'DY Médio 5 Anos', 'Payout', 'Anos com Dividendos',
   'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
