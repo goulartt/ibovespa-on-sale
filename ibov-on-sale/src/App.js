@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 
-const API = 'https://ibovespa-on-sale-k4yd3ybyo-jvgoulartalmeida.vercel.app';
+const API = 'https://ibovespa-on-sale-api.vercel.app';
 
 const buildTable = (data) => {
   const columnsData = Object.keys(data[0]).map((value) => ({
