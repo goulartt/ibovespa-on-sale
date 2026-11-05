@@ -14,9 +14,9 @@ describe('fetchRanking', () => {
       stocks: [{ Ativo: 'PETR4' }],
       updatedAt: '2026-11-05T22:00:00Z',
     });
-    expect(fetchImpl.mock.calls[0][0]).toMatch(/\/api\/ibovespa\/filtered\?sort=evEbit$/);
+    expect(fetchImpl.mock.calls[0][0]).toMatch(/\/api\/ibovespa\/filtered\?sort=evEbit&limit=200$/);
     await fetchRanking({ fetchImpl, sort: 'magicFormula' });
-    expect(fetchImpl.mock.calls[1][0]).toMatch(/sort=magicFormula$/);
+    expect(fetchImpl.mock.calls[1][0]).toMatch(/sort=magicFormula&limit=200$/);
   });
 
   test('turns HTTP errors into a friendly ApiError', async () => {

@@ -8,13 +8,16 @@ export class ApiError extends Error {
   }
 }
 
+// Every stock that passes the filters (the API allows up to 200).
+const MAX_RESULTS = 200;
+
 export const SORTS = { evEbit: 'evEbit', magicFormula: 'magicFormula' };
 
 // Returns { stocks, updatedAt } for the "on sale" ranking.
 export async function fetchRanking({ sort = SORTS.evEbit, signal, fetchImpl = fetch } = {}) {
   let response;
   try {
-    response = await fetchImpl(`${API_URL}/api/ibovespa/filtered?sort=${encodeURIComponent(sort)}`, { signal });
+    response = await fetchImpl(`${API_URL}/api/ibovespa/filtered?sort=${encodeURIComponent(sort)}&limit=${MAX_RESULTS}`, { signal });
   } catch (error) {
     if (error.name === 'AbortError') throw error;
     throw new ApiError('Não foi possível conectar à API. Verifique sua conexão.');

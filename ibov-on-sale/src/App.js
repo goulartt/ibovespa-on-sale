@@ -38,8 +38,9 @@ function Header({ updatedAt }) {
         Ibovespa em Promoção
       </Typography>
       <Typography sx={{ mt: 2, maxWidth: '62ch', fontSize: { xs: 16, md: 18 }, color: 'text.secondary' }}>
-        Ações da B3 que dão lucro, têm liquidez e pagam bons dividendos, da mais barata para a mais cara
-        pelo EV/EBIT.
+        Ações da B3 com lucro em todos os últimos 5 anos, dividendos acima de 6% ao ano sem depender de
+        pagamentos extraordinários, payout de até 100% e dívida sob controle, da mais barata para a mais
+        cara.
       </Typography>
       {updatedAt && (
         <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
