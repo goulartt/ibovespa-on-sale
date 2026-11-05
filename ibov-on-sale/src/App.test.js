@@ -29,6 +29,21 @@ test('shows the summary and the ranking', async () => {
   expect(screen.getByText('3,00x')).toBeInTheDocument(); // median EV/EBIT
 });
 
+test('switching to the magic formula fetches the ranking again', async () => {
+  fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: null });
+  render(<App />);
+  await screen.findByRole('article', { name: '1º lugar: AAAA3' });
+
+  userEvent.click(screen.getByRole('button', { name: /Fórmula Mágica/ }));
+  await waitFor(() => expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'magicFormula' })));
+});
+
+test('explains when no stock passes the filters', async () => {
+  fetchRanking.mockResolvedValue({ stocks: [], updatedAt: null });
+  render(<App />);
+  expect(await screen.findByText(/Nenhuma ação passou em todos os filtros/)).toBeInTheDocument();
+});
+
 test('shows an error with a retry button', async () => {
   fetchRanking
     .mockRejectedValueOnce(new Error('A API está indisponível no momento.'))

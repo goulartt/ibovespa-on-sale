@@ -5,7 +5,8 @@ import { FIELDS, withDerivedFields } from './fields';
 const API_FIELDS = [
   'Ranking', 'Ativo', 'Empresa', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
-  'Liquidez Média Diária', 'Data Balanço', 'Situação', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
+  'Liquidez Média Diária', 'Data Balanço', 'Situação', 'DY Médio 5 Anos', 'Payout', 'Anos com Dividendos',
+  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
 ];
 
 describe('field metadata', () => {
@@ -36,6 +37,8 @@ describe('buildColumns', () => {
     expect(fmt('Liquidez Média Diária', 2.5e9)).toBe('R$ 2,50 bi');
     expect(fmt('Data Balanço', '2026-06-30')).toBe('30/06/2026');
     expect(fmt('P/L', null)).toBe('—');
+    expect(fmt('Anos com Dividendos', 4)).toBe('4 de 5');
+    expect(fmt('Lucros Anuais', [{ ano: 2024, lucro: 2.5e9 }, { ano: 2025, lucro: -1e6 }])).toBe('2024: R$ 2,50 bi; 2025: R$ -1,00 mi');
   });
 
   test('numeric columns are right aligned and use friendly headers', () => {

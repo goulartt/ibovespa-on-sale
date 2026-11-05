@@ -3,28 +3,29 @@ import { Alert, Box, Button, Container, CssBaseline, Link, Paper, Stack, Typogra
 import { ThemeProvider } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import theme from './theme';
-import { fetchRanking } from './lib/api';
+import { fetchRanking, SORTS } from './lib/api';
 import { withDerivedFields } from './lib/fields';
 import { formatDateTime } from './lib/format';
 import PriceTags from './components/PriceTags';
 import Summary from './components/Summary';
 import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
+import SortSelector from './components/SortSelector';
 
-function useRanking() {
+function useRanking(sort) {
   const [state, setState] = useState({ stocks: [], updatedAt: null, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
     setState(s => ({ ...s, loading: true, error: null }));
-    fetchRanking({ signal: controller.signal })
+    fetchRanking({ sort, signal: controller.signal })
       .then(({ stocks, updatedAt }) => setState({ stocks, updatedAt, loading: false, error: null }))
       .catch(error => {
         if (error.name !== 'AbortError') setState(s => ({ ...s, loading: false, error: error.message }));
       });
     return () => controller.abort();
-  }, [attempt]);
+  }, [sort, attempt]);
 
   const retry = useCallback(() => setAttempt(a => a + 1), []);
   return { ...state, retry };
@@ -50,7 +51,8 @@ function Header({ updatedAt }) {
 }
 
 export default function App() {
-  const { stocks, updatedAt, loading, error, retry } = useRanking();
+  const [sort, setSort] = useState(SORTS.evEbit);
+  const { stocks, updatedAt, loading, error, retry } = useRanking(sort);
   const rows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
 
   return (
@@ -68,11 +70,20 @@ export default function App() {
             </Alert>
           ) : (
             <Stack spacing={{ xs: 4, md: 5 }}>
-              <PriceTags stocks={rows} loading={loading} />
-              <Summary stocks={rows} loading={loading} />
-              <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
-                <StocksTable stocks={rows} loading={loading} />
-              </Paper>
+              <SortSelector value={sort} onChange={setSort} disabled={loading} />
+              {!loading && rows.length === 0 ? (
+                <Alert severity="info">
+                  Nenhuma ação passou em todos os filtros hoje. Veja os critérios em “Como a lista é montada”.
+                </Alert>
+              ) : (
+                <>
+                  <PriceTags stocks={rows} loading={loading} />
+                  <Summary stocks={rows} loading={loading} />
+                  <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
+                    <StocksTable stocks={rows} loading={loading} />
+                  </Paper>
+                </>
+              )}
             </Stack>
           )}
           <Box sx={{ mt: 4 }}>

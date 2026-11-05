@@ -48,6 +48,9 @@ function Tag({ stock, index, loading }) {
       <Typography sx={{ mt: 1, fontSize: 15 }}>
         {loading ? <Skeleton width={140} /> : <>Dividend yield de <strong>{formatPercent(stock['Dividend Yield'])}</strong></>}
       </Typography>
+      <Typography sx={{ fontSize: 14, opacity: 0.8 }}>
+        {loading ? <Skeleton width={120} /> : <>Média de 5 anos: {formatPercent(stock['DY Médio 5 Anos'])}</>}
+      </Typography>
     </Box>
   );
 }

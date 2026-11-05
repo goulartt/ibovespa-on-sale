@@ -4,6 +4,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ColumnHeader from '../components/ColumnHeader';
 import TickerLogo from '../components/TickerLogo';
+import ProfitSparkline from '../components/ProfitSparkline';
 import { companyName } from './names';
 import { tokens } from '../theme';
 import { FIELDS } from './fields';
@@ -21,9 +22,11 @@ export const FORMATTERS = {
   compactCurrency: formatCompactCurrency,
   date: formatDate,
   situation: value => value || 'Normal',
+  outOfFive: value => (isNumber(value) ? `${value} de 5` : EMPTY),
+  sparkline: years => (Array.isArray(years) && years.length ? years.map(y => `${y.ano}: ${formatCompactCurrency(y.lucro)}`).join('; ') : EMPTY),
 };
 
-const NUMERIC_FORMATS = new Set(['rank', 'currency', 'percent', 'multiple', 'compactCurrency']);
+const NUMERIC_FORMATS = new Set(['rank', 'currency', 'percent', 'multiple', 'compactCurrency', 'outOfFive']);
 
 const signColor = value => (!isNumber(value) || value === 0 ? 'text.primary' : value > 0 ? 'success.main' : 'error.main');
 
@@ -96,6 +99,7 @@ function rendererFor(meta) {
   if (meta.format === 'ticker') return renderTicker;
   if (meta.format === 'rank') return renderRank;
   if (meta.format === 'situation') return renderSituation;
+  if (meta.format === 'sparkline') return ({ value }) => <ProfitSparkline years={value} />;
   if (meta.highlight === 'dividend') return renderDividend;
   if (meta.trend) return renderTrend;
   if (meta.signed) return renderSigned;
@@ -115,7 +119,7 @@ export function buildColumns(fields = FIELDS) {
       width: meta.width || 112,
       align: numeric ? 'right' : 'left',
       headerAlign: numeric ? 'right' : 'left',
-      sortable: true,
+      sortable: meta.format !== 'sparkline',
       valueFormatter: ({ value }) => format(value),
       renderHeader: () => <ColumnHeader label={meta.label} description={meta.description} />,
       renderCell: rendererFor(meta),
