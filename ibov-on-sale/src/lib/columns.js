@@ -1,0 +1,126 @@
+import React from 'react';
+import { Box, Chip, Typography } from '@mui/material';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ColumnHeader from '../components/ColumnHeader';
+import { FIELDS } from './fields';
+import {
+  formatCompactCurrency, formatCurrency, formatDate, formatMultiple, formatPercent, isNumber, EMPTY,
+} from './format';
+
+export const FORMATTERS = {
+  rank: value => (isNumber(value) ? String(value) : EMPTY),
+  ticker: value => value ?? EMPTY,
+  text: value => value ?? EMPTY,
+  currency: formatCurrency,
+  percent: formatPercent,
+  multiple: formatMultiple,
+  compactCurrency: formatCompactCurrency,
+  date: formatDate,
+};
+
+const NUMERIC_FORMATS = new Set(['rank', 'currency', 'percent', 'multiple', 'compactCurrency']);
+
+const signColor = value => (!isNumber(value) || value === 0 ? 'text.primary' : value > 0 ? 'success.main' : 'error.main');
+
+function renderTicker({ value, row }) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, lineHeight: 1.2 }}>
+      <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>{value}</Typography>
+      <Typography variant="caption" color="text.secondary" noWrap title={row.Empresa}>{row.Empresa}</Typography>
+    </Box>
+  );
+}
+
+function renderRank({ value }) {
+  const top = value <= 3;
+  return (
+    <Box
+      sx={{
+        width: 28, height: 28, borderRadius: '50%', display: 'grid', placeItems: 'center',
+        fontSize: 13, fontWeight: 700,
+        bgcolor: top ? 'secondary.main' : 'action.hover',
+        color: top ? 'secondary.contrastText' : 'text.secondary',
+      }}
+    >
+      {value}
+    </Box>
+  );
+}
+
+function renderDividend({ value, formattedValue }) {
+  if (!isNumber(value)) return EMPTY;
+  const strong = value >= 10;
+  return (
+    <Chip
+      size="small"
+      label={formattedValue}
+      color={strong ? 'success' : 'default'}
+      variant={strong ? 'filled' : 'outlined'}
+      sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}
+    />
+  );
+}
+
+function renderSigned({ value, formattedValue }) {
+  return (
+    <Box component="span" sx={{ color: signColor(value), fontVariantNumeric: 'tabular-nums' }}>
+      {formattedValue}
+    </Box>
+  );
+}
+
+function renderTrend({ value, formattedValue }) {
+  if (!isNumber(value)) return EMPTY;
+  const Icon = value >= 0 ? ArrowDropUpIcon : ArrowDropDownIcon;
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', color: signColor(value), fontWeight: 600 }}>
+      <Icon fontSize="small" />
+      {formattedValue.replace('-', '')}
+    </Box>
+  );
+}
+
+function rendererFor(meta) {
+  if (meta.format === 'ticker') return renderTicker;
+  if (meta.format === 'rank') return renderRank;
+  if (meta.highlight === 'dividend') return renderDividend;
+  if (meta.trend) return renderTrend;
+  if (meta.signed) return renderSigned;
+  return undefined;
+}
+
+// DataGrid (v5) column definitions built from the field metadata.
+export function buildColumns(fields = FIELDS) {
+  return fields.map(meta => {
+    const numeric = NUMERIC_FORMATS.has(meta.format);
+    const format = FORMATTERS[meta.format] || FORMATTERS.text;
+    return {
+      field: meta.field,
+      headerName: meta.label,
+      description: meta.description,
+      type: numeric ? 'number' : 'string',
+      width: meta.width || 112,
+      align: numeric ? 'right' : 'left',
+      headerAlign: numeric ? 'right' : 'left',
+      sortable: true,
+      valueFormatter: ({ value }) => format(value),
+      renderHeader: () => <ColumnHeader label={meta.label} description={meta.description} />,
+      renderCell: rendererFor(meta),
+      // Missing values always sort last.
+      sortComparator: numeric ? compareNullsLast : undefined,
+    };
+  });
+}
+
+export function compareNullsLast(a, b) {
+  const aMissing = !isNumber(a);
+  const bMissing = !isNumber(b);
+  if (aMissing && bMissing) return 0;
+  if (aMissing) return 1;
+  if (bMissing) return -1;
+  return a - b;
+}
+
+export const initialColumnVisibility = (fields = FIELDS) =>
+  Object.fromEntries(fields.filter(f => f.hidden).map(f => [f.field, false]));
