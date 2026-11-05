@@ -13,8 +13,8 @@ export const FIELDS = [
     field: 'Ativo',
     label: 'Ativo',
     format: 'ticker',
-    width: 230,
-    description: 'Código de negociação na B3 e nome da empresa. Quando a empresa tem mais de uma classe de ação, aparece a mais negociada.',
+    width: 250,
+    description: 'Código de negociação na B3, logo e nome da empresa. Quando a empresa tem mais de uma classe de ação, aparece a mais negociada.',
   },
   {
     field: 'Empresa',
@@ -159,6 +159,14 @@ export const FIELDS = [
     label: 'MM200',
     format: 'currency',
     description: 'Média móvel simples dos preços de fechamento dos últimos 200 pregões (cerca de dez meses). Muito usada para identificar a tendência de longo prazo.',
+  },
+  {
+    field: 'Situação',
+    label: 'Situação',
+    format: 'situation',
+    width: 200,
+    hidden: true,
+    description: 'Situação da empresa no cadastro da CVM. Empresas em recuperação judicial ou extrajudicial, falência ou liquidação ficam fora do ranking.',
   },
   {
     field: 'Data Balanço',

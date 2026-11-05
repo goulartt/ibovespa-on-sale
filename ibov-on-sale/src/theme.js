@@ -1,30 +1,46 @@
 import { createTheme } from '@mui/material/styles';
 
+// "Encarte de oferta": quiet paper-and-ink page; the offer yellow is reserved for price tags.
+export const tokens = {
+  paper: '#F3F5F2',
+  surface: '#FFFFFF',
+  ink: '#1A2420',
+  muted: '#5E6B64',
+  rule: '#DDE3DE',
+  market: '#0A5C45',
+  offer: '#FFCE1F',
+  loss: '#B3261E',
+};
+
+export const displayFont = '"Barlow Condensed", "Arial Narrow", sans-serif';
+
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#0f2a4a', light: '#1d4a7a', dark: '#081a30', contrastText: '#ffffff' },
-    secondary: { main: '#c9a227', contrastText: '#1b1400' },
-    success: { main: '#11865b' },
-    error: { main: '#c62f3d' },
-    background: { default: '#f4f6f9', paper: '#ffffff' },
-    text: { primary: '#14202e', secondary: '#5b6878' },
-    divider: '#e3e8ef',
+    primary: { main: tokens.market, contrastText: '#ffffff' },
+    secondary: { main: tokens.offer, contrastText: tokens.ink },
+    success: { main: tokens.market },
+    error: { main: tokens.loss },
+    background: { default: tokens.paper, paper: tokens.surface },
+    text: { primary: tokens.ink, secondary: tokens.muted },
+    divider: tokens.rule,
   },
-  shape: { borderRadius: 10 },
+  shape: { borderRadius: 6 },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
-    h1: { fontWeight: 800, letterSpacing: -0.5 },
+    fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+    h1: { fontFamily: displayFont, fontWeight: 800, lineHeight: 0.95, letterSpacing: 0 },
+    h2: { fontFamily: displayFont, fontWeight: 700, letterSpacing: 0 },
     button: { textTransform: 'none', fontWeight: 600 },
   },
   components: {
     MuiTooltip: {
       styleOverrides: {
-        tooltip: { backgroundColor: '#0f2a4a', fontSize: 13, padding: 10, boxShadow: '0 8px 24px rgba(8, 26, 48, 0.25)' },
-        arrow: { color: '#0f2a4a' },
+        tooltip: { backgroundColor: tokens.ink, fontSize: 13, padding: 10 },
+        arrow: { color: tokens.ink },
       },
     },
     MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } },
+    MuiLink: { defaultProps: { color: 'primary' } },
   },
 });
 

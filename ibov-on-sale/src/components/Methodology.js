@@ -6,15 +6,15 @@ const CRITERIA = [
   ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
   ['Rentabilidade', 'margem EBIT positiva nos últimos 12 meses'],
   ['Dividendos', 'dividend yield acima de 6% nos últimos 12 meses'],
-  ['Saúde', 'empresas em recuperação judicial ficam de fora'],
+  ['Situação', 'ficam de fora as empresas em recuperação judicial ou extrajudicial, falência ou liquidação, segundo o cadastro da CVM'],
   ['Ordenação', 'do menor para o maior EV/EBIT; uma ação por empresa (a mais negociada)'],
 ];
 
 export default function Methodology() {
   return (
-    <Accordion disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 3, '&:before': { display: 'none' } }}>
+    <Accordion disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography sx={{ fontWeight: 600 }}>Como as ações são selecionadas</Typography>
+        <Typography sx={{ fontWeight: 600 }}>Como a lista é montada</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Box component="ul" sx={{ m: 0, pl: 2.5, display: 'grid', gap: 0.75 }}>

@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Box, Button, Chip, Container, CssBaseline, Link, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, CssBaseline, Link, Paper, Stack, Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import UpdateIcon from '@mui/icons-material/Update';
 import theme from './theme';
 import { fetchRanking } from './lib/api';
 import { withDerivedFields } from './lib/fields';
 import { formatDateTime } from './lib/format';
-import SummaryCards from './components/SummaryCards';
+import PriceTags from './components/PriceTags';
+import Summary from './components/Summary';
 import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
 
@@ -30,37 +30,21 @@ function useRanking() {
   return { ...state, retry };
 }
 
-function Hero({ updatedAt }) {
+function Header({ updatedAt }) {
   return (
-    <Box
-      component="header"
-      sx={{
-        color: 'primary.contrastText',
-        background: 'linear-gradient(135deg, #081a30 0%, #0f2a4a 55%, #1d4a7a 100%)',
-        pt: { xs: 5, md: 7 },
-        pb: { xs: 10, md: 12 },
-      }}
-    >
-      <Container maxWidth="xl">
-        <Chip
-          label="Ações da B3"
-          size="small"
-          sx={{ bgcolor: 'rgba(201, 162, 39, 0.18)', color: 'secondary.main', fontWeight: 700, mb: 2 }}
-        />
-        <Typography variant="h1" sx={{ fontSize: { xs: 32, md: 44 } }}>
-          Ibovespa em Promoção
+    <Box component="header" sx={{ pt: { xs: 5, md: 8 }, pb: { xs: 4, md: 5 } }}>
+      <Typography variant="h1" sx={{ fontSize: { xs: 56, sm: 80, md: 104 } }}>
+        Ibovespa em Promoção
+      </Typography>
+      <Typography sx={{ mt: 2, maxWidth: '62ch', fontSize: { xs: 16, md: 18 }, color: 'text.secondary' }}>
+        Ações da B3 que dão lucro, têm liquidez e pagam bons dividendos, da mais barata para a mais cara
+        pelo EV/EBIT.
+      </Typography>
+      {updatedAt && (
+        <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
+          Atualizado em {formatDateTime(updatedAt)}
         </Typography>
-        <Typography sx={{ mt: 1.5, maxWidth: 680, opacity: 0.85, fontSize: { xs: 15, md: 17 } }}>
-          Empresas lucrativas, líquidas e pagadoras de dividendos, ordenadas das mais baratas para as
-          mais caras pelo EV/EBIT.
-        </Typography>
-        {updatedAt && (
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 3, opacity: 0.8 }}>
-            <UpdateIcon fontSize="small" />
-            <Typography variant="body2">Dados atualizados em {formatDateTime(updatedAt)}</Typography>
-          </Stack>
-        )}
-      </Container>
+      )}
     </Box>
   );
 }
@@ -72,37 +56,38 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Hero updatedAt={updatedAt} />
-      <Container maxWidth="xl" component="main" sx={{ mt: { xs: -7, md: -8 }, pb: 6 }}>
-        <Stack spacing={3}>
+      <Container maxWidth="xl">
+        <Header updatedAt={updatedAt} />
+        <Box component="main" sx={{ pb: 8 }}>
           {error ? (
-            <Paper sx={{ p: 3, borderRadius: 3 }}>
-              <Alert
-                severity="error"
-                action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={retry}>Tentar novamente</Button>}
-              >
-                {error}
-              </Alert>
-            </Paper>
+            <Alert
+              severity="error"
+              action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={retry}>Tentar novamente</Button>}
+            >
+              {error}
+            </Alert>
           ) : (
-            <>
-              <SummaryCards stocks={rows} loading={loading} />
-              <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 10px 30px rgba(15, 42, 74, 0.08)' }}>
+            <Stack spacing={{ xs: 4, md: 5 }}>
+              <PriceTags stocks={rows} loading={loading} />
+              <Summary stocks={rows} loading={loading} />
+              <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
                 <StocksTable stocks={rows} loading={loading} />
               </Paper>
-            </>
+            </Stack>
           )}
-          <Methodology />
-        </Stack>
+          <Box sx={{ mt: 4 }}>
+            <Methodology />
+          </Box>
+        </Box>
       </Container>
-      <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', py: 3, bgcolor: 'background.paper' }}>
+      <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', py: 3 }}>
         <Container maxWidth="xl">
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
             <Typography variant="body2" color="text.secondary">
-              Dados: CVM (dados abertos) e Yahoo Finance. Conteúdo informativo, não é recomendação de investimento.
+              Dados da CVM e do Yahoo Finance. Conteúdo informativo, não é recomendação de investimento.
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Powered by{' '}
+              Feito por{' '}
               <Link href="https://github.com/goulartt" target="_blank" rel="noopener" underline="hover">João Goulart</Link>
             </Typography>
           </Stack>

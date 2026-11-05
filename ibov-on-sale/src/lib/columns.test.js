@@ -5,7 +5,7 @@ import { FIELDS, withDerivedFields } from './fields';
 const API_FIELDS = [
   'Ranking', 'Ativo', 'Empresa', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
-  'Liquidez Média Diária', 'Data Balanço', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
+  'Liquidez Média Diária', 'Data Balanço', 'Situação', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
 ];
 
 describe('field metadata', () => {
@@ -52,7 +52,7 @@ describe('buildColumns', () => {
 
 test('secondary columns start hidden', () => {
   const visibility = initialColumnVisibility();
-  expect(visibility).toMatchObject({ Empresa: false, MA5: false, PSR: false });
+  expect(visibility).toMatchObject({ Empresa: false, MA5: false, PSR: false, 'Situação': false });
   expect(visibility['Dividend Yield']).toBeUndefined();
 });
 

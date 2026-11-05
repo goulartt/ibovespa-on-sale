@@ -3,6 +3,9 @@ import { Box, Chip, Typography } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ColumnHeader from '../components/ColumnHeader';
+import TickerLogo from '../components/TickerLogo';
+import { companyName } from './names';
+import { tokens } from '../theme';
 import { FIELDS } from './fields';
 import {
   formatCompactCurrency, formatCurrency, formatDate, formatMultiple, formatPercent, isNumber, EMPTY,
@@ -17,6 +20,7 @@ export const FORMATTERS = {
   multiple: formatMultiple,
   compactCurrency: formatCompactCurrency,
   date: formatDate,
+  situation: value => value || 'Normal',
 };
 
 const NUMERIC_FORMATS = new Set(['rank', 'currency', 'percent', 'multiple', 'compactCurrency']);
@@ -25,11 +29,18 @@ const signColor = value => (!isNumber(value) || value === 0 ? 'text.primary' : v
 
 function renderTicker({ value, row }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, lineHeight: 1.2 }}>
-      <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>{value}</Typography>
-      <Typography variant="caption" color="text.secondary" noWrap title={row.Empresa}>{row.Empresa}</Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+      <TickerLogo ticker={value} />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, lineHeight: 1.2 }}>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>{value}</Typography>
+        <Typography variant="caption" color="text.secondary" noWrap title={row.Empresa}>{companyName(row.Empresa)}</Typography>
+      </Box>
     </Box>
   );
+}
+
+function renderSituation({ value }) {
+  return value ? <Chip size="small" color="error" variant="outlined" label={value} /> : 'Normal';
 }
 
 function renderRank({ value }) {
@@ -39,8 +50,8 @@ function renderRank({ value }) {
       sx={{
         width: 28, height: 28, borderRadius: '50%', display: 'grid', placeItems: 'center',
         fontSize: 13, fontWeight: 700,
-        bgcolor: top ? 'secondary.main' : 'action.hover',
-        color: top ? 'secondary.contrastText' : 'text.secondary',
+        bgcolor: top ? tokens.offer : 'transparent',
+        color: top ? tokens.ink : 'text.secondary',
       }}
     >
       {value}
@@ -84,6 +95,7 @@ function renderTrend({ value, formattedValue }) {
 function rendererFor(meta) {
   if (meta.format === 'ticker') return renderTicker;
   if (meta.format === 'rank') return renderRank;
+  if (meta.format === 'situation') return renderSituation;
   if (meta.highlight === 'dividend') return renderDividend;
   if (meta.trend) return renderTrend;
   if (meta.signed) return renderSigned;

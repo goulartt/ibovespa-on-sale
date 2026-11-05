@@ -20,11 +20,12 @@ test('shows the summary and the ranking', async () => {
   fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: '2026-11-05T22:26:45.480Z' });
   render(<App />);
 
-  expect(await screen.findByText('Ações selecionadas')).toBeInTheDocument();
-  await waitFor(() => expect(screen.getByText('12,00%')).toBeInTheDocument()); // highest DY card
+  expect(await screen.findByRole('article', { name: '1º lugar: AAAA3' })).toBeInTheDocument();
+  expect(screen.getByRole('article', { name: '2º lugar: BBBB4' })).toBeInTheDocument();
+  expect(screen.getByText('Empresa A')).toBeInTheDocument(); // readable company name on the tag
   expect(screen.getByText('Ibovespa em Promoção')).toBeInTheDocument();
-  expect(screen.getByText(/Dados atualizados em 05\/11\/2026/)).toBeInTheDocument();
-  expect(screen.getByText('10,00%')).toBeInTheDocument(); // average DY on the summary card
+  expect(screen.getByText(/Atualizado em 05\/11\/2026/)).toBeInTheDocument();
+  expect(screen.getByText('10,00%')).toBeInTheDocument(); // average DY in the summary
   expect(screen.getByText('3,00x')).toBeInTheDocument(); // median EV/EBIT
 });
 
@@ -37,6 +38,6 @@ test('shows an error with a retry button', async () => {
   expect(await screen.findByText('A API está indisponível no momento.')).toBeInTheDocument();
   userEvent.click(screen.getByRole('button', { name: /tentar novamente/i }));
   await waitFor(() => expect(fetchRanking).toHaveBeenCalledTimes(2));
-  expect(await screen.findByText('12,00%')).toBeInTheDocument();
+  expect(await screen.findByRole('article', { name: '1º lugar: AAAA3' })).toBeInTheDocument();
   expect(screen.queryByText('A API está indisponível no momento.')).not.toBeInTheDocument();
 });

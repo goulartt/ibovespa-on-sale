@@ -54,7 +54,7 @@ export default function StocksTable({ stocks, loading }) {
         disableColumnMenu
         sx={{
           border: 0,
-          '& .MuiDataGrid-columnHeaders': { bgcolor: 'grey.50', borderBottom: 1, borderColor: 'divider' },
+          '& .MuiDataGrid-columnHeaders': { bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' },
           '& .MuiDataGrid-columnHeaderTitleContainer': { overflow: 'visible' },
           '& .MuiDataGrid-cell': { fontVariantNumeric: 'tabular-nums', borderColor: 'divider' },
           '& .MuiDataGrid-row:hover': { bgcolor: 'action.hover' },
