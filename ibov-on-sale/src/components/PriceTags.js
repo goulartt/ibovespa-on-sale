@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Skeleton, Typography } from '@mui/material';
 import TickerLogo from './TickerLogo';
 import { displayFont, tokens } from '../theme';
-import { formatMultiple } from '../lib/format';
 import { companyName } from '../lib/names';
 
 const TILTS = ['-1.6deg', '0.9deg', '-0.6deg'];
@@ -44,7 +43,7 @@ function Tag({ stock, index, loading, sector, strategy }) {
       </Box>
       <Typography sx={{ mt: 2, fontSize: 14 }}>{strategy.tag.priceLabel}</Typography>
       <Typography sx={{ fontFamily: displayFont, fontWeight: 800, fontSize: 64, lineHeight: 0.9 }}>
-        {loading ? <Skeleton width={110} /> : formatMultiple(stock[strategy.tag.priceField])}
+        {loading ? <Skeleton width={110} /> : strategy.tag.format(stock[strategy.tag.priceField])}
       </Typography>
       <Typography sx={{ mt: 1, fontSize: 15 }}>
         {loading ? <Skeleton width={140} /> : <>{first[0]} <strong>{first[1]}</strong></>}

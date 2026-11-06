@@ -3,8 +3,13 @@ import { FIELDS } from './fields';
 
 test('reads the strategy from the URL hash, defaulting to dividends', () => {
   expect(strategyFromHash('#qualidade')).toBe('qualidade');
-  expect(strategyFromHash('')).toBe('dividendos');
-  expect(strategyFromHash('#unknown')).toBe('dividendos');
+  expect(strategyFromHash('#dividendos')).toBe('dividendos');
+  expect(strategyFromHash('')).toBe('deepValue');
+  expect(strategyFromHash('#unknown')).toBe('deepValue');
+});
+
+test('Deep Value is the first tab', () => {
+  expect(Object.keys(STRATEGIES)).toEqual(['deepValue', 'dividendos', 'qualidade']);
 });
 
 test('every strategy refers to existing fields', () => {

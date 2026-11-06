@@ -70,6 +70,13 @@ export const FIELDS = [
     description: 'Valor da firma (valor de mercado + dívida líquida) dividido pelo EBIT dos últimos 12 meses. Quanto menor, mais barata a empresa considerando também o endividamento. É o critério de ordenação do ranking.',
   },
   {
+    field: 'EBIT/EV',
+    label: 'EBIT/EV',
+    format: 'percent',
+    signed: true,
+    description: 'Lucro operacional (EBIT) dos últimos 12 meses dividido pelo valor da firma (valor de mercado + dívida líquida). É o EV/EBIT invertido: quanto maior, mais barata a empresa em relação ao que gera de lucro operacional. Critério de ordenação do Deep Value.',
+  },
+  {
     field: 'P/L',
     label: 'P/L',
     format: 'multiple',

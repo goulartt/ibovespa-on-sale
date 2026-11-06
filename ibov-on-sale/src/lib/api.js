@@ -8,13 +8,13 @@ export class ApiError extends Error {
   }
 }
 
-// Every stock that passes the filters (the API allows up to 200).
-const MAX_RESULTS = 200;
+// Every stock that passes the filters (the API allows up to 500).
+const MAX_RESULTS = 500;
 
 export const SORTS = { evEbit: 'evEbit', magicFormula: 'magicFormula' };
 
 // Returns { stocks, updatedAt } for the "on sale" ranking.
-export async function fetchRanking({ strategy = 'dividendos', sort = SORTS.evEbit, signal, fetchImpl = fetch } = {}) {
+export async function fetchRanking({ strategy = 'deepValue', sort = SORTS.evEbit, signal, fetchImpl = fetch } = {}) {
   let response;
   try {
     const query = new URLSearchParams({ strategy, sort, limit: String(MAX_RESULTS) });

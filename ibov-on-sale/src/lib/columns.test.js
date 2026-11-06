@@ -6,7 +6,7 @@ const API_FIELDS = [
   'Ranking', 'Ativo', 'Empresa', 'Setor', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
   'Liquidez Média Diária', 'Data Balanço', 'Situação', 'DY Médio 5 Anos', 'Payout', 'Anos com Dividendos',
-  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
+  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
 ];
 
 describe('field metadata', () => {

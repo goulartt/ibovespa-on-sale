@@ -10,9 +10,9 @@ jest.mock('./lib/api', () => ({
 }));
 
 const STOCKS = [
-  { Ranking: 1, Ativo: 'AAAA3', Empresa: 'EMPRESA A S.A.', Setor: 'Consumo', 'Cotação': 10, 'Dividend Yield': 12, 'EV/EBIT': 2, MA200: 8 },
-  { Ranking: 2, Ativo: 'BBBB4', Empresa: 'EMPRESA B S.A.', Setor: 'Financeiro', 'Cotação': 20, 'Dividend Yield': 8, 'EV/EBIT': 4, MA200: 25 },
-  { Ranking: 3, Ativo: 'CCCC3', Empresa: 'EMPRESA C S.A.', Setor: 'Financeiro', 'Cotação': 5, 'Dividend Yield': 10, 'EV/EBIT': 6, MA200: 5 },
+  { Ranking: 1, Ativo: 'AAAA3', Empresa: 'EMPRESA A S.A.', Setor: 'Consumo', 'Cotação': 10, 'Dividend Yield': 12, 'EV/EBIT': 2, 'EBIT/EV': 50, MA200: 8 },
+  { Ranking: 2, Ativo: 'BBBB4', Empresa: 'EMPRESA B S.A.', Setor: 'Financeiro', 'Cotação': 20, 'Dividend Yield': 8, 'EV/EBIT': 4, 'EBIT/EV': 25, MA200: 25 },
+  { Ranking: 3, Ativo: 'CCCC3', Empresa: 'EMPRESA C S.A.', Setor: 'Financeiro', 'Cotação': 5, 'Dividend Yield': 10, 'EV/EBIT': 6, 'EBIT/EV': 15, MA200: 5 },
 ];
 
 afterEach(() => {
@@ -29,7 +29,7 @@ test('shows the summary and the ranking', async () => {
   expect(screen.getByText('Empresa A')).toBeInTheDocument(); // readable company name on the tag
   expect(screen.getByText('Ibovespa em Promoção')).toBeInTheDocument();
   expect(screen.getByText(/Atualizado em 05\/11\/2026/)).toBeInTheDocument();
-  expect(screen.getAllByText('10,00%').length).toBeGreaterThan(0); // average DY in the summary
+  expect(screen.getAllByText('30,00%').length).toBeGreaterThan(0); // average EBIT/EV in the summary (Deep Value)
   expect(screen.getAllByText('4,00x').length).toBeGreaterThan(0); // median EV/EBIT
 });
 
@@ -46,7 +46,8 @@ test('switches to the quality strategy and remembers it in the URL', async () =>
   fetchRanking.mockResolvedValue({ stocks: STOCKS.map(s => ({ ...s, 'P/L': 7, ROCE: 22, 'Dívida Líquida/EBITDA': 0.4 })), updatedAt: null });
   render(<App />);
   await screen.findByRole('article', { name: '1º lugar: AAAA3' });
-  expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'dividendos' }));
+  expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'deepValue' }));
+  expect(screen.getByRole('tab', { name: 'Deep Value' })).toHaveAttribute('aria-selected', 'true');
 
   userEvent.click(screen.getByRole('tab', { name: 'Qualidade a bom preço' }));
   await waitFor(() => expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'qualidade' })));

@@ -3,8 +3,8 @@ import { Box, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { SORTS } from '../lib/api';
 
 const OPTIONS = [
-  { value: SORTS.evEbit, label: 'Mais baratas', hint: 'menor EV/EBIT' },
-  { value: SORTS.magicFormula, label: 'Fórmula Mágica', hint: 'barata e rentável: EV/EBIT + ROIC' },
+  { value: SORTS.evEbit, label: 'Mais baratas', hint: 'maior EBIT/EV' },
+  { value: SORTS.magicFormula, label: 'Fórmula Mágica', hint: 'barata e rentável: EBIT/EV + ROIC' },
 ];
 
 export default function SortSelector({ value, onChange, disabled }) {
