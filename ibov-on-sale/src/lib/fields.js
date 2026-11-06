@@ -238,6 +238,14 @@ export const FIELDS = [
     description: 'Situação da empresa no cadastro da CVM. Empresas em recuperação judicial ou extrajudicial, falência ou liquidação ficam fora do ranking.',
   },
   {
+    field: 'Instituição Financeira',
+    label: 'Financeira',
+    format: 'yesNo',
+    width: 110,
+    hidden: true,
+    description: 'Banco, seguradora ou holding financeira, pelo formato do balanço ou pelo setor na CVM. Ficam fora do Deep Value.',
+  },
+  {
     field: 'Data Balanço',
     label: 'Balanço',
     format: 'date',

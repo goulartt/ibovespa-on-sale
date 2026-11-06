@@ -22,6 +22,7 @@ export const FORMATTERS = {
   compactCurrency: formatCompactCurrency,
   date: formatDate,
   situation: value => value || 'Normal',
+  yesNo: value => (value === true ? 'Sim' : value === false ? 'Não' : EMPTY),
   outOfFive: value => (isNumber(value) ? `${value} de 5` : EMPTY),
   sparkline: years => (Array.isArray(years) && years.length ? years.map(y => `${y.ano}: ${formatCompactCurrency(y.lucro)}`).join('; ') : EMPTY),
 };

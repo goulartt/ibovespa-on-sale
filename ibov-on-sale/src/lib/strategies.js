@@ -9,6 +9,7 @@ export const STRATEGIES = {
     criteria: [
       ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
       ['Lucro operacional', 'EBIT positivo nos últimos 12 meses'],
+      ['Sem bancos e seguradoras', 'bancos, seguradoras e holdings financeiras (como Itaúsa e Caixa Seguridade) ficam de fora, porque o resultado financeiro é a própria operação delas; corretoras de seguros continuam'],
       ['Atenção', 'o ranking é automático: antes de comprar, confira nos balanços (veja a coluna "Lucro 5 anos") se o EBIT não foi inflado por eventos não recorrentes, como venda de ativos. A estratégia pede cerca de 20 ações ao mesmo tempo, porque pode ter anos ruins'],
     ],
     tag: {
@@ -85,7 +86,7 @@ export const STRATEGIES = {
 // Criteria that apply to every strategy.
 export const COMMON_CRITERIA = [
   ['Situação', 'ficam de fora as empresas em recuperação judicial ou extrajudicial, falência ou liquidação, segundo o cadastro da CVM'],
-  ['Instituições financeiras', 'bancos, seguradoras e holdings financeiras ficam fora de todas as listas, porque EBIT e EV não se aplicam a elas'],
+  ['Bancos', 'bancos e seguradoras que publicam balanço no formato de instituição financeira não têm EBIT nem EBITDA, por isso não aparecem em nenhuma lista; holdings financeiras com balanço no formato comum (como Itaúsa) podem aparecer em Dividendos sustentáveis e Qualidade a bom preço'],
   ['Setores', 'os setores de atividade informados à CVM são agrupados em 6: Energia e saneamento, Commodities, Construção e imóveis, Financeiro, Consumo e Indústria e serviços'],
   ['Ordenação', 'do maior para o menor EBIT/EV (o mesmo que do menor para o maior EV/EBIT), ou pela Fórmula Mágica, que soma a posição no EBIT/EV (mais barata) com a posição no ROIC (melhor negócio); uma ação por empresa, a mais negociada'],
 ];
