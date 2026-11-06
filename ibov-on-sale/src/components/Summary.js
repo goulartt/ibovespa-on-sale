@@ -1,6 +1,6 @@
 import React from 'react';
 import { Skeleton, Typography } from '@mui/material';
-import { formatMultiple, formatPercent, isNumber } from '../lib/format';
+import { isNumber } from '../lib/format';
 
 const average = values => (values.length ? values.reduce((a, b) => a + b, 0) / values.length : null);
 
@@ -11,23 +11,26 @@ function median(values) {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-export function summarize(stocks) {
-  const pick = field => stocks.map(s => s[field]).filter(isNumber);
-  return {
-    count: stocks.length,
-    averageDy: average(pick('Dividend Yield')),
-    medianEvEbit: median(pick('EV/EBIT')),
-  };
+const AGGREGATES = { average, median };
+
+// [label, field, aggregate, format] -> { label, value }
+export function summarize(stocks, metrics) {
+  return metrics.map(([label, field, aggregate, format]) => ({
+    label,
+    value: format(AGGREGATES[aggregate](stocks.map(s => s[field]).filter(isNumber))),
+  }));
 }
 
 // One plain sentence instead of a row of stat cards.
-export default function Summary({ stocks, loading, sector }) {
+export default function Summary({ stocks, loading, sector, strategy }) {
   if (loading) return <Skeleton width="60%" sx={{ fontSize: 18 }} />;
-  const s = summarize(stocks);
+  const [first, second] = summarize(stocks, strategy.summary);
+  const count = stocks.length;
   return (
     <Typography sx={{ fontSize: 18, maxWidth: '70ch' }}>
-      <strong>{s.count} {s.count === 1 ? 'ação' : 'ações'}</strong>{sector ? ` de ${sector}` : ''} {s.count === 1 ? 'passou' : 'passaram'} em todos os filtros. Juntas, têm dividend yield médio
-      de <strong>{formatPercent(s.averageDy)}</strong> e EV/EBIT mediano de <strong>{formatMultiple(s.medianEvEbit)}</strong>.
+      <strong>{count} {count === 1 ? 'ação' : 'ações'}</strong>{sector ? ` de ${sector}` : ''}{' '}
+      {count === 1 ? 'passou' : 'passaram'} em todos os filtros. Juntas, têm {first.label}{' '}
+      de <strong>{first.value}</strong> e {second.label} de <strong>{second.value}</strong>.
     </Typography>
   );
 }

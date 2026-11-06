@@ -2,13 +2,14 @@ import React from 'react';
 import { Box, Skeleton, Typography } from '@mui/material';
 import TickerLogo from './TickerLogo';
 import { displayFont, tokens } from '../theme';
-import { formatMultiple, formatPercent } from '../lib/format';
+import { formatMultiple } from '../lib/format';
 import { companyName } from '../lib/names';
 
 const TILTS = ['-1.6deg', '0.9deg', '-0.6deg'];
 
 // The top of the ranking presented as supermarket price tags: the "price" is the EV/EBIT.
-function Tag({ stock, index, loading, sector }) {
+function Tag({ stock, index, loading, sector, strategy }) {
+  const [first, second] = stock ? strategy.tag.lines(stock) : [[], []];
   return (
     <Box
       component="article"
@@ -41,21 +42,21 @@ function Tag({ stock, index, loading, sector }) {
           </Typography>
         </Box>
       </Box>
-      <Typography sx={{ mt: 2, fontSize: 14 }}>EV/EBIT</Typography>
+      <Typography sx={{ mt: 2, fontSize: 14 }}>{strategy.tag.priceLabel}</Typography>
       <Typography sx={{ fontFamily: displayFont, fontWeight: 800, fontSize: 64, lineHeight: 0.9 }}>
-        {loading ? <Skeleton width={110} /> : formatMultiple(stock['EV/EBIT'])}
+        {loading ? <Skeleton width={110} /> : formatMultiple(stock[strategy.tag.priceField])}
       </Typography>
       <Typography sx={{ mt: 1, fontSize: 15 }}>
-        {loading ? <Skeleton width={140} /> : <>Dividend yield de <strong>{formatPercent(stock['Dividend Yield'])}</strong></>}
+        {loading ? <Skeleton width={140} /> : <>{first[0]} <strong>{first[1]}</strong></>}
       </Typography>
       <Typography sx={{ fontSize: 14, opacity: 0.8 }}>
-        {loading ? <Skeleton width={120} /> : <>Média de 5 anos: {formatPercent(stock['DY Médio 5 Anos'])}</>}
+        {loading ? <Skeleton width={120} /> : <>{second[0]} {second[1]}</>}
       </Typography>
     </Box>
   );
 }
 
-export default function PriceTags({ stocks, loading, sector }) {
+export default function PriceTags({ stocks, loading, sector, strategy }) {
   const top = loading ? [null, null, null] : stocks.slice(0, 3);
   if (!top.length) return null;
   return (
@@ -65,7 +66,7 @@ export default function PriceTags({ stocks, loading, sector }) {
       sx={{ display: 'grid', gap: { xs: 2, sm: 3 }, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, maxWidth: 1040 }}
     >
       {top.map((stock, index) => (
-        <Tag key={stock ? stock.Ativo : index} stock={stock} index={index} loading={loading} sector={sector} />
+        <Tag key={stock ? stock.Ativo : index} stock={stock} index={index} loading={loading} sector={sector} strategy={strategy} />
       ))}
     </Box>
   );

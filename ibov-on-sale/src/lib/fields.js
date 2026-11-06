@@ -124,6 +124,20 @@ export const FIELDS = [
     description: 'Retorno sobre o Capital Investido: EBIT dos últimos 12 meses dividido pelo capital investido (patrimônio líquido + dívida líquida). Usado na Fórmula Mágica para medir a qualidade do negócio.',
   },
   {
+    field: 'ROCE',
+    label: 'ROCE',
+    format: 'percent',
+    signed: true,
+    description: 'Retorno sobre o Capital Empregado: EBIT dos últimos 12 meses dividido pelo capital empregado médio (patrimônio líquido + passivo não circulante). Acima de 15% indica um negócio que gera muito lucro com pouco capital.',
+  },
+  {
+    field: 'Dívida Líquida/EBITDA',
+    label: 'Dív. Líq./EBITDA',
+    format: 'multiple',
+    width: 140,
+    description: 'Dívida líquida dividida pelo EBITDA (EBIT + depreciação e amortização) dos últimos 12 meses: em quantos anos a geração de caixa operacional quitaria a dívida. Negativo indica caixa líquido.',
+  },
+  {
     field: 'Lucros Anuais',
     label: 'Lucro 5 anos',
     format: 'sparkline',

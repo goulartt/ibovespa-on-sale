@@ -1,28 +1,19 @@
 import React from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { COMMON_CRITERIA } from '../lib/strategies';
 
-const CRITERIA = [
-  ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
-  ['Dividendos', 'dividend yield acima de 6% tanto nos últimos 12 meses quanto na média dos últimos 5 anos, o que deixa de fora dividendos extraordinários'],
-  ['Regularidade', 'proventos pagos em pelo menos 3 dos últimos 5 anos'],
-  ['Payout', 'a empresa distribui no máximo 100% do lucro, ou seja, não paga mais do que ganha'],
-  ['Lucro', 'lucro em todos os últimos balanços anuais (pelo menos 3) e nos últimos 12 meses, com margem EBIT positiva'],
-  ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT'],
-  ['Situação', 'ficam de fora as empresas em recuperação judicial ou extrajudicial, falência ou liquidação, segundo o cadastro da CVM'],
-  ['Setores', 'os setores de atividade informados à CVM são agrupados em 6: Energia e saneamento, Commodities, Construção e imóveis, Financeiro, Consumo e Indústria e serviços'],
-  ['Ordenação', 'do menor para o maior EV/EBIT, ou pela Fórmula Mágica, que soma a posição no EV/EBIT (mais barata) com a posição no ROIC (melhor negócio); uma ação por empresa, a mais negociada'],
-];
 
-export default function Methodology() {
+export default function Methodology({ strategy }) {
+  const criteria = [...strategy.criteria, ...COMMON_CRITERIA];
   return (
     <Accordion disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography sx={{ fontWeight: 600 }}>Como a lista é montada</Typography>
+        <Typography sx={{ fontWeight: 600 }}>Como a lista “{strategy.label}” é montada</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Box component="ul" sx={{ m: 0, pl: 2.5, display: 'grid', gap: 0.75 }}>
-          {CRITERIA.map(([title, text]) => (
+          {criteria.map(([title, text]) => (
             <li key={title}>
               <Typography variant="body2"><strong>{title}:</strong> {text}.</Typography>
             </li>

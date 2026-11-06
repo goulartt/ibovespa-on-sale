@@ -15,7 +15,10 @@ const STOCKS = [
   { Ranking: 3, Ativo: 'CCCC3', Empresa: 'EMPRESA C S.A.', Setor: 'Financeiro', 'Cotação': 5, 'Dividend Yield': 10, 'EV/EBIT': 6, MA200: 5 },
 ];
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => {
+  jest.clearAllMocks();
+  window.history.replaceState(null, '', '/');
+});
 
 test('shows the summary and the ranking', async () => {
   fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: '2026-11-05T22:26:45.480Z' });
@@ -37,6 +40,28 @@ test('switching to the magic formula fetches the ranking again', async () => {
 
   userEvent.click(screen.getByRole('button', { name: /Fórmula Mágica/ }));
   await waitFor(() => expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'magicFormula' })));
+});
+
+test('switches to the quality strategy and remembers it in the URL', async () => {
+  fetchRanking.mockResolvedValue({ stocks: STOCKS.map(s => ({ ...s, 'P/L': 7, ROCE: 22, 'Dívida Líquida/EBITDA': 0.4 })), updatedAt: null });
+  render(<App />);
+  await screen.findByRole('article', { name: '1º lugar: AAAA3' });
+  expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'dividendos' }));
+
+  userEvent.click(screen.getByRole('tab', { name: 'Qualidade a bom preço' }));
+  await waitFor(() => expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'qualidade' })));
+  expect(window.location.hash).toBe('#qualidade');
+  expect(await screen.findByText(/^Empresas muito rentáveis/)).toBeInTheDocument(); // strategy subtitle
+  expect((await screen.findAllByText('ROCE de')).length).toBeGreaterThan(0); // price tags
+  expect(screen.getByText(/ROCE médio/)).toBeInTheDocument();
+});
+
+test('opens the strategy from the URL hash', async () => {
+  window.history.replaceState(null, '', '/#qualidade');
+  fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: null });
+  render(<App />);
+  await waitFor(() => expect(fetchRanking).toHaveBeenCalledWith(expect.objectContaining({ strategy: 'qualidade' })));
+  expect(screen.getByRole('tab', { name: 'Qualidade a bom preço' })).toHaveAttribute('aria-selected', 'true');
 });
 
 test('filters the ranking by sector', async () => {

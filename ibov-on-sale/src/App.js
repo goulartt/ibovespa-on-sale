@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Box, Button, Container, CssBaseline, Link, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, CssBaseline, Link, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import theme from './theme';
@@ -12,37 +12,61 @@ import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
 import SortSelector from './components/SortSelector';
 import SectorFilter, { ALL_SECTORS, filterBySector } from './components/SectorFilter';
+import { STRATEGIES, strategyFromHash } from './lib/strategies';
 
-function useRanking(sort) {
+function useRanking(strategy, sort) {
   const [state, setState] = useState({ stocks: [], updatedAt: null, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
     setState(s => ({ ...s, loading: true, error: null }));
-    fetchRanking({ sort, signal: controller.signal })
+    fetchRanking({ strategy, sort, signal: controller.signal })
       .then(({ stocks, updatedAt }) => setState({ stocks, updatedAt, loading: false, error: null }))
       .catch(error => {
         if (error.name !== 'AbortError') setState(s => ({ ...s, loading: false, error: error.message }));
       });
     return () => controller.abort();
-  }, [sort, attempt]);
+  }, [strategy, sort, attempt]);
 
   const retry = useCallback(() => setAttempt(a => a + 1), []);
   return { ...state, retry };
 }
 
-function Header({ updatedAt }) {
+// Selected strategy lives in the URL hash (#qualidade) so a link opens the same ranking.
+function useStrategy() {
+  const [id, setId] = useState(() => strategyFromHash(window.location.hash));
+  useEffect(() => {
+    const onHashChange = () => setId(strategyFromHash(window.location.hash));
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  const select = useCallback(next => {
+    window.history.replaceState(null, '', `#${next}`);
+    setId(next);
+  }, []);
+  return [STRATEGIES[id], select];
+}
+
+function Header({ updatedAt, strategy, onStrategyChange }) {
   return (
     <Box component="header" sx={{ pt: { xs: 5, md: 8 }, pb: { xs: 4, md: 5 } }}>
       <Typography variant="h1" sx={{ fontSize: { xs: 56, sm: 80, md: 104 } }}>
         Ibovespa em Promoção
       </Typography>
       <Typography sx={{ mt: 2, maxWidth: '62ch', fontSize: { xs: 16, md: 18 }, color: 'text.secondary' }}>
-        Ações da B3 com lucro em todos os últimos 5 anos, dividendos acima de 6% ao ano sem depender de
-        pagamentos extraordinários, payout de até 100% e dívida sob controle, da mais barata para a mais
-        cara.
+        {strategy.lede}
       </Typography>
+      <Tabs
+        value={strategy.id}
+        onChange={(event, next) => onStrategyChange(next)}
+        aria-label="Estratégia"
+        variant="scrollable"
+        allowScrollButtonsMobile
+        sx={{ mt: 3, borderBottom: 1, borderColor: 'divider', '& .MuiTab-root': { fontSize: 16, fontWeight: 600, px: 0, mr: 4, minWidth: 0 } }}
+      >
+        {Object.values(STRATEGIES).map(s => <Tab key={s.id} value={s.id} label={s.label} />)}
+      </Tabs>
       {updatedAt && (
         <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
           Atualizado em {formatDateTime(updatedAt)}
@@ -53,9 +77,10 @@ function Header({ updatedAt }) {
 }
 
 export default function App() {
+  const [strategy, setStrategy] = useStrategy();
   const [sort, setSort] = useState(SORTS.evEbit);
-  const { stocks, updatedAt, loading, error, retry } = useRanking(sort);
   const [sector, setSector] = useState(ALL_SECTORS);
+  const { stocks, updatedAt, loading, error, retry } = useRanking(strategy.id, sort);
   const allRows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
   const rows = useMemo(() => filterBySector(allRows, sector), [allRows, sector]);
 
@@ -63,7 +88,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container maxWidth="xl">
-        <Header updatedAt={updatedAt} />
+        <Header updatedAt={updatedAt} strategy={strategy} onStrategyChange={next => { setStrategy(next); setSector(ALL_SECTORS); }} />
         <Box component="main" sx={{ pb: 8 }}>
           {error ? (
             <Alert
@@ -80,21 +105,21 @@ export default function App() {
               </Stack>
               {!loading && rows.length === 0 ? (
                 <Alert severity="info">
-                  Nenhuma ação passou em todos os filtros hoje. Veja os critérios em “Como a lista é montada”.
+                  Nenhuma ação passou em todos os filtros hoje. Veja os critérios logo abaixo.
                 </Alert>
               ) : (
                 <>
-                  <PriceTags stocks={rows} loading={loading} sector={sector} />
-                  <Summary stocks={rows} loading={loading} sector={sector} />
+                  <PriceTags stocks={rows} loading={loading} sector={sector} strategy={strategy} />
+                  <Summary stocks={rows} loading={loading} sector={sector} strategy={strategy} />
                   <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
-                    <StocksTable stocks={rows} loading={loading} />
+                    <StocksTable key={strategy.id} stocks={rows} loading={loading} hiddenColumns={strategy.hiddenColumns} />
                   </Paper>
                 </>
               )}
             </Stack>
           )}
           <Box sx={{ mt: 4 }}>
-            <Methodology />
+            <Methodology strategy={strategy} />
           </Box>
         </Box>
       </Container>

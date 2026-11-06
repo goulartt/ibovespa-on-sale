@@ -138,5 +138,5 @@ export function compareNullsLast(a, b) {
   return a - b;
 }
 
-export const initialColumnVisibility = (fields = FIELDS) =>
-  Object.fromEntries(fields.filter(f => f.hidden).map(f => [f.field, false]));
+export const initialColumnVisibility = (fields = FIELDS, extraHidden = []) =>
+  Object.fromEntries(fields.filter(f => f.hidden || extraHidden.includes(f.field)).map(f => [f.field, false]));

@@ -26,9 +26,9 @@ function Toolbar({ onExport }) {
   );
 }
 
-export default function StocksTable({ stocks, loading }) {
+export default function StocksTable({ stocks, loading, hiddenColumns = [] }) {
   const columns = useMemo(() => buildColumns(FIELDS), []);
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS));
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS, hiddenColumns));
   const [sortModel, setSortModel] = useState([{ field: 'Ranking', sort: 'asc' }]);
   const [filterModel, setFilterModel] = useState({ items: [], quickFilterValues: [] });
   const [pageSize, setPageSize] = useState(25);
