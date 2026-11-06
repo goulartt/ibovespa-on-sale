@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ibovespa-on-sale/static/css/main.a9041707.css",
-    "main.js": "/ibovespa-on-sale/static/js/main.002dd29c.js",
+    "main.js": "/ibovespa-on-sale/static/js/main.ae7338bb.js",
     "index.html": "/ibovespa-on-sale/index.html",
     "main.a9041707.css.map": "/ibovespa-on-sale/static/css/main.a9041707.css.map",
-    "main.002dd29c.js.map": "/ibovespa-on-sale/static/js/main.002dd29c.js.map"
+    "main.ae7338bb.js.map": "/ibovespa-on-sale/static/js/main.ae7338bb.js.map"
   },
   "entrypoints": [
     "static/css/main.a9041707.css",
-    "static/js/main.002dd29c.js"
+    "static/js/main.ae7338bb.js"
   ]
 }
