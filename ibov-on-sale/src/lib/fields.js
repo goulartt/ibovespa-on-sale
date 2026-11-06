@@ -42,7 +42,7 @@ export const FIELDS = [
     label: 'Div. Yield',
     format: 'percent',
     highlight: 'dividend',
-    description: 'Dividendos e JCP pagos nos últimos 12 meses divididos pela cotação atual. Pode incluir pagamentos extraordinários; por isso o filtro usa o menor valor entre este e o DY médio de 5 anos.',
+    description: 'Dividendos e JCP pagos nos últimos 12 meses divididos pela cotação atual. Pode incluir pagamentos extraordinários; por isso a estratégia de dividendos também exige um bom DY médio de 5 anos.',
   },
   {
     field: 'DY Médio 5 Anos',

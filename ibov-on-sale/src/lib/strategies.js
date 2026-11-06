@@ -30,14 +30,14 @@ export const STRATEGIES = {
   dividendos: {
     id: 'dividendos',
     label: 'Dividendos sustentáveis',
-    lede: 'Ações da B3 com lucro em todos os últimos 5 anos, dividendos acima de 6% ao ano sem depender de pagamentos extraordinários, payout de até 100% e dívida sob controle, da mais barata para a mais cara.',
+    lede: 'Ações da B3 com lucro em todos os últimos 5 anos, dividendos acima de 6% no último ano e de 5% na média de 5 anos (sem depender de pagamentos extraordinários), payout de até 120% e dívida sob controle, da mais barata para a mais cara.',
     criteria: [
       ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
-      ['Dividendos', 'dividend yield acima de 6% tanto nos últimos 12 meses quanto na média dos últimos 5 anos, o que deixa de fora dividendos extraordinários'],
+      ['Dividendos', 'dividend yield acima de 6% nos últimos 12 meses e acima de 5% na média dos últimos 5 anos, o que deixa de fora dividendos extraordinários'],
       ['Regularidade', 'proventos pagos em pelo menos 3 dos últimos 5 anos'],
-      ['Payout', 'a empresa distribui no máximo 100% do lucro, ou seja, não paga mais do que ganha'],
+      ['Payout', 'a empresa distribui no máximo 120% do lucro dos últimos 12 meses; a folga acima de 100% cobre dividendos pagos agora sobre o lucro do ano anterior'],
       ['Lucro', 'lucro em todos os últimos balanços anuais (pelo menos 3) e nos últimos 12 meses, com margem EBIT positiva'],
-      ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT'],
+      ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT, ou 4,5 vezes em Energia e saneamento, setores de receita regulada que operam naturalmente mais alavancados'],
     ],
     tag: {
       priceField: 'EV/EBIT',
@@ -58,12 +58,12 @@ export const STRATEGIES = {
   qualidade: {
     id: 'qualidade',
     label: 'Qualidade a bom preço',
-    lede: 'Empresas muito rentáveis (ROCE acima de 15%), com pouca dívida (menos de 1 ano de EBITDA) e negociadas a no máximo 10 vezes o lucro: negócios excelentes, financeiramente sólidos e com desconto.',
+    lede: 'Empresas muito rentáveis (ROCE acima de 15%), com pouca dívida (menos de 1,5 ano de EBITDA) e negociadas a no máximo 15 vezes o lucro: negócios excelentes, financeiramente sólidos e com desconto.',
     criteria: [
       ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
       ['Rentabilidade', 'ROCE acima de 15%: EBIT dos últimos 12 meses dividido pelo capital empregado médio (patrimônio líquido + passivo não circulante, média entre o último balanço e o do fim do ano anterior)'],
-      ['Endividamento', 'dívida líquida menor que 1 vez o EBITDA dos últimos 12 meses; caixa líquido (dívida negativa) é ainda melhor'],
-      ['Preço', 'P/L entre 0 e 10, usando um múltiplo histórico como referência de compra em vez de projeções otimistas'],
+      ['Endividamento', 'dívida líquida menor que 1,5 vez o EBITDA dos últimos 12 meses; caixa líquido (dívida negativa) é ainda melhor'],
+      ['Preço', 'P/L entre 0 e 15, cerca de 25% de desconto sobre um múltiplo de mercado de 20 vezes, usando um múltiplo histórico como referência de compra em vez de projeções otimistas'],
     ],
     tag: {
       priceField: 'P/L',
