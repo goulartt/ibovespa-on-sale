@@ -19,6 +19,9 @@ test('shows one card per strategy compared with the CDI', async () => {
   expect(within(card).getByText('150,00% do CDI')).toBeInTheDocument();
   expect(screen.getByRole('article', { name: 'Qualidade a bom preço' })).toHaveTextContent('-5,00%');
   expect(screen.getByRole('table', { name: 'Retorno por ano' })).toBeInTheDocument();
+  expect(card).toHaveTextContent('Carteira20 ações');
+  expect(screen.getByRole('article', { name: 'Dividendos sustentáveis' })).toHaveTextContent('Carteira10 ações');
+  expect(screen.getByText(/as 20 primeiras do ranking \(10 em Dividendos sustentáveis\)/)).toBeInTheDocument();
 });
 
 test('switching the start year and the mode updates the numbers', async () => {

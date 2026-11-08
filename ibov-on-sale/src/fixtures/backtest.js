@@ -34,7 +34,7 @@ const robust = { novas: { rotation: { acimaCdi: 10, total: 12 }, buyAndHold: { a
 
 export const BACKTEST = {
   updatedAt: '2026-11-08T12:00:00.000Z',
-  parametros: { size: 20, buffer: 40 },
+  parametros: { tamanhos: { deepValue: 20, qualidade: 20, dividendos: 10 } },
   periodos: [period('completo', '2014 até hoje', 1), period('validacao', '2020 até hoje (validação)', 2)],
   robustez: { anos: [2014, 2015], deepValue: robust, dividendos: robust, qualidade: robust },
 };

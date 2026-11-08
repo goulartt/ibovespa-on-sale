@@ -30,7 +30,7 @@ function useBacktest() {
 
 const valueColor = v => (typeof v !== 'number' ? 'text.primary' : v >= 0 ? 'success.main' : 'error.main');
 
-function StrategyCard({ series, run, cdi, robustness }) {
+function StrategyCard({ series, run, cdi, robustness, size }) {
   const m = run.metricas;
   const beat = m.retorno > cdi.metricas.retorno;
   return (
@@ -50,6 +50,7 @@ function StrategyCard({ series, run, cdi, robustness }) {
           ['Ao ano', signedPercent(m.retornoAnual)],
           ['Maior queda', formatPercent(m.maxDrawdown)],
           ['Volatilidade', `${formatPercent(m.volatilidade)} a.a.`],
+          ['Carteira', `${size} ações`],
           ['Operações', String(m.operacoes)],
           ...(robustness ? [['Inícios acima do CDI', `${robustness.acimaCdi} de ${robustness.total}`]] : []),
         ].map(([k, v]) => (
@@ -153,7 +154,8 @@ const LIMITATIONS = [
   ['Cadastro atual', 'a situação na CVM (recuperação judicial) é a de hoje, valendo a partir da data de início informada; empresas que já saíram de uma recuperação podem ter entrado no ranking quando estavam nela'],
   ['Balanços refeitos', 'quando um balanço foi reapresentado, usamos a versão final com a data de entrega da primeira'],
   ['Custos', '0,1% por compra e por venda; sem imposto de renda nem taxa de custódia. Proventos reinvestidos (preço ajustado). Dinheiro parado rende o CDI'],
-  ['Rotação', 'nos primeiros pregões após 5/abr, 20/mai, 20/ago e 20/nov (depois dos prazos dos balanços), vende quem saiu do top 40 ou deixou de passar nos filtros e compra as mais bem colocadas que não estão na carteira de 20'],
+  ['Tamanho da carteira', '20 ações no Deep Value e na Qualidade a bom preço; 10 em Dividendos sustentáveis, porque poucas ações passam em todos os filtros de dividendos (de 1 a 6 por trimestre entre 2014 e 2019): com 20 posições, a maior parte da carteira ficaria em caixa'],
+  ['Rotação', 'nos primeiros pregões após 5/abr, 20/mai, 20/ago e 20/nov (depois dos prazos dos balanços), vende quem saiu do dobro do tamanho da carteira no ranking (top 40, ou top 20 em Dividendos) ou deixou de passar nos filtros, e compra as mais bem colocadas que não estão na carteira'],
 ];
 
 export default function BacktestView() {
@@ -179,8 +181,12 @@ export default function BacktestView() {
   }
 
   const start = data.periodos.find(p => p.id === periodId) || data.periodos[0];
-  const size = data.parametros?.size ?? 10;
-  const buffer = data.parametros?.buffer ?? 2 * size;
+  const sizeOf = id => data.parametros?.tamanhos?.[id] ?? data.parametros?.size ?? 10;
+  const sizes = [...new Set(SERIES.map(s => sizeOf(s.id)))];
+  const exceptions = SERIES.filter(s => sizeOf(s.id) !== sizeOf(SERIES[0].id));
+  const sizeText = exceptions.length
+    ? `as ${sizeOf(SERIES[0].id)} primeiras do ranking (${exceptions.map(s => `${sizeOf(s.id)} em ${s.label}`).join(', ')})`
+    : `as ${sizes[0]} primeiras do ranking`;
   const robustness = (strategy) => (start.id === data.periodos[0].id ? data.robustez?.[strategy]?.[version]?.[mode] : null);
   const cdi = start.benchmarks.cdi;
   const ibov = start.benchmarks.ibov;
@@ -202,13 +208,13 @@ export default function BacktestView() {
       <Typography sx={{ fontSize: 18, maxWidth: '75ch' }}>
         De {formatDate(start.inicio)} a {formatDate(start.fim)}, o CDI rendeu <strong>{signedPercent(cdi.metricas.retorno)}</strong> e
         o Ibovespa <strong>{signedPercent(ibov.metricas.retorno)}</strong> ({signedPercent(cdi.metricas.retornoAnual)} e{' '}
-        {signedPercent(ibov.metricas.retornoAnual)} ao ano). Cada estratégia começou com as {size} primeiras do
-        ranking, com o mesmo peso{mode === 'rotation' ? `, e trocou a cada trimestre quem saiu do top ${buffer}` : ', sem nenhuma troca depois'}.
+        {signedPercent(ibov.metricas.retornoAnual)} ao ano). Cada estratégia começou com {sizeText}, com o mesmo
+        peso{mode === 'rotation' ? ', e trocou a cada trimestre quem saiu do dobro desse número de posições no ranking' : ', sem nenhuma troca depois'}.
       </Typography>
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
         {SERIES.map(s => runOf(start, s.id, version, mode) && (
-          <StrategyCard key={s.id} series={s} run={runOf(start, s.id, version, mode)} cdi={cdi} robustness={robustness(s.id)} />
+          <StrategyCard key={s.id} series={s} run={runOf(start, s.id, version, mode)} cdi={cdi} robustness={robustness(s.id)} size={sizeOf(s.id)} />
         ))}
       </Box>
 

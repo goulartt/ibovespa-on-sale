@@ -138,7 +138,7 @@ export const DEFAULT_STRATEGY = 'deepValue';
 export const BACKTEST_VIEW = {
   id: 'backtest',
   label: 'Backtest',
-  lede: 'Quanto teriam rendido as 20 primeiras de cada estratégia desde 2014, comparadas com o CDI e o Ibovespa, recalculando os rankings só com o que era público em cada data.',
+  lede: 'Quanto teriam rendido as 20 primeiras de cada estratégia (10 em Dividendos) desde 2014, comparadas com o CDI e o Ibovespa, recalculando os rankings só com o que era público em cada data.',
 };
 
 export function viewFromHash(hash) {
