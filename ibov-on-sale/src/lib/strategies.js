@@ -11,6 +11,7 @@ export const STRATEGIES = {
       ['Lucro operacional', 'EBIT positivo nos últimos 12 meses'],
       ['Sem bancos e seguradoras', 'bancos, seguradoras e holdings financeiras (como Itaúsa e Caixa Seguridade) ficam de fora, porque o resultado financeiro é a própria operação delas; corretoras de seguros continuam'],
       ['Tendência de alta', 'cotação acima da média móvel dos últimos 200 pregões: ações baratas que já voltaram a subir, em vez de baratas ainda em queda. No backtest de 2014 até hoje, foi a única mudança que melhorou tanto o período usado para escolher as regras (2014 a 2019) quanto o de validação (2020 até hoje)'],
+      ['Resultado histórico', 'No backtest de jan/2014 a nov/2026, sempre com o que era público em cada data, as 20 primeiras com troca a cada trimestre renderam 23,4% ao ano, contra 10,0% do CDI e 9,9% do Ibovespa, e bateram o CDI em 10 de 12 carteiras iniciadas em cada janeiro. Mas com quedas de até 53% no caminho; veja a aba Backtest'],
       ['Atenção', 'o ranking é automático: antes de comprar, confira nos balanços (veja a coluna "Lucro 5 anos") se o EBIT não foi inflado por eventos não recorrentes, como venda de ativos. A estratégia pede cerca de 20 ações ao mesmo tempo e revisão a cada trimestre (vender quem sai do top 40), porque pode ter anos ruins e quedas fortes'],
     ],
     tag: {
@@ -40,6 +41,7 @@ export const STRATEGIES = {
       ['Payout', 'a empresa distribui no máximo 120% do lucro dos últimos 12 meses; a folga acima de 100% cobre dividendos pagos agora sobre o lucro do ano anterior'],
       ['Lucro', 'lucro em todos os últimos balanços anuais (pelo menos 3) e nos últimos 12 meses, com margem EBIT positiva'],
       ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT, ou 4,5 vezes em Energia e saneamento, setores de receita regulada que operam naturalmente mais alavancados'],
+      ['Resultado histórico', 'No backtest de jan/2014 a nov/2026, sempre com o que era público em cada data, as 10 primeiras com troca a cada trimestre renderam 12,9% ao ano, contra 10,0% do CDI, e bateram o CDI em todas as 12 carteiras iniciadas em cada janeiro, com queda máxima de 31%. A lista é curta: entre 2014 e 2019, só de 1 a 6 ações passavam em todos os filtros; veja a aba Backtest'],
       ['Preço teto de Bazin', 'dividendo médio por ação dos últimos 5 anos ÷ 6%, o rendimento mínimo que Décio Bazin exigia. Abaixo dele, os dividendos médios rendem mais de 6% ao ano sobre o preço pago. Use o filtro "Só abaixo do preço teto de Bazin" para ver apenas essas ações'],
     ],
     tag: {
@@ -69,6 +71,7 @@ export const STRATEGIES = {
       ['Rentabilidade', 'ROCE acima de 15%: EBIT dos últimos 12 meses dividido pelo capital empregado médio (patrimônio líquido + passivo não circulante, média entre o último balanço e o do fim do ano anterior)'],
       ['Endividamento', 'dívida líquida menor que 1,5 vez o EBITDA dos últimos 12 meses; caixa líquido (dívida negativa) é ainda melhor'],
       ['Lucro estável', 'lucro em todos os últimos balanços anuais (pelo menos 3), variando até 50% em torno da média. Sem essa regra, a lista comprava empresas cíclicas (siderurgia, mineração) no pico do lucro, quando o ROCE é alto e o P/L baixo logo antes de o lucro cair; no backtest de 2014 até hoje, a regra levou a estratégia de abaixo para acima do CDI'],
+      ['Resultado histórico', 'No backtest de jan/2014 a nov/2026, sempre com o que era público em cada data, as 20 primeiras com troca a cada trimestre renderam 12,0% ao ano, contra 10,0% do CDI, e bateram o CDI em 11 de 12 carteiras iniciadas em cada janeiro, com queda máxima de 19%; veja a aba Backtest'],
       ['Preço', 'P/L entre 0 e 15, cerca de 25% de desconto sobre um múltiplo de mercado de 20 vezes, usando um múltiplo histórico como referência de compra em vez de projeções otimistas'],
     ],
     tag: {
@@ -103,6 +106,7 @@ export const STRATEGIES = {
       ['Bancos e seguradoras', 'entram, porque o método usa o lucro líquido e não o EBIT'],
     ],
     excludeCommon: ['Bancos', 'Ordenação'],
+    extraSources: 'As taxas de juros vêm do Tesouro Direto (Tesouro Transparente) e a expectativa de IPCA, do Boletim Focus do Banco Central.',
     tag: {
       priceField: 'Desconto',
       priceLabel: 'Desconto',

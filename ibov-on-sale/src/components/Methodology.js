@@ -23,8 +23,9 @@ export default function Methodology({ strategy }) {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           Os indicadores fundamentalistas são calculados a partir dos demonstrativos enviados à CVM
           (dados abertos), acumulados nos últimos 12 meses. Cotações, volume e proventos vêm do
-          Yahoo Finance. Os dados são atualizados todos os dias úteis após o fechamento do pregão.
-          Passe o mouse sobre o nome de cada coluna para ver o que ela significa.
+          Yahoo Finance.{strategy.extraSources ? ` ${strategy.extraSources}` : ''} Os dados são atualizados todos
+          os dias úteis após o fechamento do pregão. Passe o mouse sobre o nome de cada coluna para ver o que ela
+          significa. Resultados passados não garantem resultados futuros.
         </Typography>
       </AccordionDetails>
     </Accordion>

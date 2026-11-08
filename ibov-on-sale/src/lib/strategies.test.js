@@ -28,3 +28,10 @@ test('the backtest tab has its own hash', () => {
   expect(viewFromHash('#qualidade')).toBe('qualidade');
   expect(viewFromHash('')).toBe('deepValue');
 });
+
+test('the backtested strategies explain their historical result', () => {
+  for (const id of ['deepValue', 'dividendos', 'qualidade']) {
+    expect(STRATEGIES[id].criteria.some(([title]) => title === 'Resultado histórico')).toBe(true);
+  }
+  expect(STRATEGIES.valorIntrinseco.extraSources).toMatch(/Tesouro/);
+});

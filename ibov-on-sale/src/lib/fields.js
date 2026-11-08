@@ -7,7 +7,7 @@ export const FIELDS = [
     label: '#',
     format: 'rank',
     width: 64,
-    description: 'Posição no ranking. As ações são ordenadas do menor para o maior EV/EBIT, ou seja, da mais barata para a mais cara.',
+    description: 'Posição no ranking da estratégia: da mais barata para a mais cara pelo EBIT/EV ou pela Fórmula Mágica, conforme a ordenação escolhida, ou do maior para o menor desconto no Valor intrínseco. Veja "Como a lista é montada".',
   },
   {
     field: 'Ativo',
