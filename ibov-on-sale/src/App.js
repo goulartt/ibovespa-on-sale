@@ -13,6 +13,7 @@ import Methodology from './components/Methodology';
 import SortSelector from './components/SortSelector';
 import SectorFilter, { ALL_SECTORS, filterBySector } from './components/SectorFilter';
 import BacktestView from './components/BacktestView';
+import ValuationAssumptions from './components/ValuationAssumptions';
 import { BACKTEST_VIEW, STRATEGIES, viewFromHash } from './lib/strategies';
 
 const VIEWS = { ...STRATEGIES, [BACKTEST_VIEW.id]: BACKTEST_VIEW };
@@ -98,7 +99,8 @@ function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
       ) : (
         <Stack spacing={{ xs: 4, md: 5 }}>
           <Stack spacing={2}>
-            <SortSelector value={sort} onChange={setSort} disabled={loading} />
+            {!strategy.hideSort && <SortSelector value={sort} onChange={setSort} disabled={loading} />}
+            {strategy.showAssumptions && <ValuationAssumptions />}
             {!loading && <SectorFilter stocks={allRows} value={sector} onChange={setSector} />}
           </Stack>
           {!loading && rows.length === 0 ? (
@@ -110,7 +112,14 @@ function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
               <PriceTags stocks={rows} loading={loading} sector={sector} strategy={strategy} />
               <Summary stocks={rows} loading={loading} sector={sector} strategy={strategy} />
               <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
-                <StocksTable key={strategy.id} stocks={rows} loading={loading} hiddenColumns={strategy.hiddenColumns} />
+                <StocksTable
+                  key={strategy.id}
+                  stocks={rows}
+                  loading={loading}
+                  hiddenColumns={strategy.hiddenColumns}
+                  visibleColumns={strategy.visibleColumns}
+                  columnLabels={strategy.columnLabels}
+                />
               </Paper>
             </>
           )}

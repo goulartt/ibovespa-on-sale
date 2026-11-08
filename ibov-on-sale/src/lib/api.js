@@ -49,3 +49,10 @@ export async function fetchBacktest({ signal, fetchImpl = fetch } = {}) {
   if (!data || !Array.isArray(data.inicios)) throw new ApiError('Resposta inesperada da API.');
   return data;
 }
+
+// Discount rate inputs of the intrinsic value ({ tesouro, ipca, retornoExigido, taxaFinal, ... }).
+export async function fetchAssumptions({ signal, fetchImpl = fetch } = {}) {
+  const response = await fetchImpl(`${API_URL}/api/ibovespa/premissas`, { signal });
+  if (!response.ok) throw new ApiError('Premissas indisponíveis.', response.status);
+  return response.json();
+}

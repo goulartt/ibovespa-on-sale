@@ -9,7 +9,7 @@ test('reads the strategy from the URL hash, defaulting to dividends', () => {
 });
 
 test('Deep Value is the first tab', () => {
-  expect(Object.keys(STRATEGIES)).toEqual(['deepValue', 'dividendos', 'qualidade']);
+  expect(Object.keys(STRATEGIES)).toEqual(['deepValue', 'dividendos', 'qualidade', 'valorIntrinseco']);
 });
 
 test('every strategy refers to existing fields', () => {
@@ -19,6 +19,7 @@ test('every strategy refers to existing fields', () => {
     expect(s.hiddenColumns.filter(f => !known.has(f))).toEqual([]);
     expect(s.summary.map(([, field]) => field).filter(f => !known.has(f))).toEqual([]);
     expect(s.criteria.length).toBeGreaterThan(2);
+    expect((s.visibleColumns || []).filter(f => !known.has(f))).toEqual([]);
   }
 });
 

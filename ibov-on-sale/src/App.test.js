@@ -2,13 +2,14 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { fetchBacktest, fetchRanking } from './lib/api';
+import { fetchAssumptions, fetchBacktest, fetchRanking } from './lib/api';
 import { BACKTEST } from './fixtures/backtest';
 
 jest.mock('./lib/api', () => ({
   ...jest.requireActual('./lib/api'),
   fetchRanking: jest.fn(),
   fetchBacktest: jest.fn(),
+  fetchAssumptions: jest.fn(),
 }));
 
 const STOCKS = [
@@ -112,4 +113,28 @@ test('opens the backtest tab', async () => {
   userEvent.click(screen.getByRole('tab', { name: 'Backtest' }));
   expect(await screen.findByRole('article', { name: 'Dividendos sustentáveis' })).toBeInTheDocument();
   expect(window.location.hash).toBe('#backtest');
+});
+
+test('the intrinsic value tab ranks by discount and shows the discount rate', async () => {
+  fetchRanking.mockResolvedValue({
+    stocks: STOCKS.map((s, i) => ({ ...s, 'Valor Intrínseco': s['Cotação'] * 2, 'Preço Teto': s['Cotação'] * 1.4, Desconto: 50 - i * 10, 'Crescimento Esperado': 5 })),
+    updatedAt: null,
+  });
+  fetchAssumptions.mockResolvedValue({
+    tesouro: { titulo: 'Tesouro IPCA+ com Juros Semestrais 2037', taxa: 7.75, data: '2026-11-06' },
+    ipca: { taxa: 4.96, data: '2026-10-30' },
+    retornoExigido: 12.71,
+    crescimentoPerpetuidade: 3,
+    taxaFinal: 9.71,
+  });
+  window.history.replaceState(null, '', '#valorIntrinseco');
+  render(<App />);
+
+  expect(await screen.findByRole('article', { name: '1º lugar: AAAA3' })).toBeInTheDocument();
+  expect(fetchRanking).toHaveBeenLastCalledWith(expect.objectContaining({ strategy: 'valorIntrinseco' }));
+  expect(await screen.findByText(/Tesouro IPCA\+ com Juros Semestrais 2037/)).toBeInTheDocument();
+  expect(screen.getByText('9,71%')).toBeInTheDocument();
+  expect(screen.getAllByText('Valor intrínseco de').length).toBeGreaterThan(0);
+  expect(screen.getAllByText('Preço teto:').length).toBeGreaterThan(0);
+  expect(screen.queryByRole('button', { name: /Fórmula Mágica/ })).not.toBeInTheDocument();
 });

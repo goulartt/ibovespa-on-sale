@@ -9,7 +9,7 @@ import {
 } from '@mui/x-data-grid';
 import { Box, Button, TablePagination } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import { buildColumns, initialColumnVisibility } from '../lib/columns';
+import { buildColumns, initialColumnVisibility, withLabels } from '../lib/columns';
 import { FIELDS } from '../lib/fields';
 import { downloadCsv, PAGE_SIZE_OPTIONS, paginate, searchRows, sortRows, toCsv } from '../lib/tableData';
 
@@ -26,9 +26,10 @@ function Toolbar({ onExport }) {
   );
 }
 
-export default function StocksTable({ stocks, loading, hiddenColumns = [] }) {
-  const columns = useMemo(() => buildColumns(FIELDS), []);
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS, hiddenColumns));
+export default function StocksTable({ stocks, loading, hiddenColumns = [], visibleColumns = null, columnLabels }) {
+  const fields = useMemo(() => withLabels(FIELDS, columnLabels), [columnLabels]);
+  const columns = useMemo(() => buildColumns(fields), [fields]);
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS, hiddenColumns, visibleColumns));
   const [sortModel, setSortModel] = useState([{ field: 'Ranking', sort: 'asc' }]);
   const [filterModel, setFilterModel] = useState({ items: [], quickFilterValues: [] });
   const [pageSize, setPageSize] = useState(25);
@@ -42,8 +43,8 @@ export default function StocksTable({ stocks, loading, hiddenColumns = [] }) {
   const current = paginate(visible, page, pageSize);
 
   const exportCsv = () => {
-    const fields = FIELDS.filter(f => columnVisibilityModel[f.field] !== false);
-    downloadCsv(toCsv(visible, fields), 'ibovespa-em-promocao.csv');
+    const shown = fields.filter(f => columnVisibilityModel[f.field] !== false);
+    downloadCsv(toCsv(visible, shown), 'ibovespa-em-promocao.csv');
   };
 
   return (

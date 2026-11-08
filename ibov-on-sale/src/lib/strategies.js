@@ -1,4 +1,4 @@
-import { formatMultiple, formatPercent } from './format';
+import { formatCurrency, formatMultiple, formatPercent } from './format';
 
 // The rankings offered by the API (GET /api/ibovespa/filtered?strategy=...).
 export const STRATEGIES = {
@@ -80,6 +80,42 @@ export const STRATEGIES = {
       ['P/L mediano', 'P/L', 'median', formatMultiple],
     ],
     hiddenColumns: ['DY Médio 5 Anos', 'Payout', 'Anos com Dividendos', 'Dívida Líquida/EBIT', 'EBIT/EV'],
+  },
+
+  valorIntrinseco: {
+    id: 'valorIntrinseco',
+    label: 'Valor intrínseco',
+    lede: 'O preço teto de cada ação por um fluxo de caixa descontado simplificado (um ano de projeção e perpetuidade), comparado com a cotação: da maior para a menor margem de segurança.',
+    criteria: [
+      ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
+      ['Lucro previsível', 'o método só vale para lucros estáveis: lucro em todos os últimos balanços anuais (pelo menos 3), variação moderada entre os anos (desvio de até 50% da média) e lucro dos últimos 12 meses entre metade e o dobro da média anual'],
+      ['Fluxo de caixa', 'lucro líquido dos últimos 12 meses, como fluxo de caixa do acionista, projetado um ano à frente: × (1 + crescimento)'],
+      ['Crescimento', 'ROE médio dos últimos anos × (1 − payout médio): o lucro retido e reinvestido é o que faz o lucro crescer'],
+      ['Taxa de desconto', 'retorno exigido (Tesouro IPCA+ com juros semestrais de cerca de 10 anos + IPCA esperado pelo Boletim Focus para os próximos 12 meses) menos 3% de crescimento na perpetuidade'],
+      ['Valor intrínseco', 'fluxo de caixa do próximo ano ÷ taxa de desconto (perpetuidade com crescimento, como no modelo de Gordon), dividido pelo número de ações; em units e em empresas com ON e PN, proporcional ao preço de cada ativo'],
+      ['Preço teto', 'valor intrínseco menos uma margem de segurança que depende da previsibilidade do lucro: 20% quando o lucro anual varia até 15% em torno da média, 30% até 30% e 40% acima disso. Abaixo dele, a ação está barata com folga; em verde na tabela'],
+      ['Desconto', '(valor intrínseco − cotação) ÷ valor intrínseco. Empresas excelentes e previsíveis pedem menos margem de segurança; as mais arriscadas, bem mais. É uma aproximação: mudanças no ROE, no payout, nos juros ou no crescimento alteram bastante o resultado'],
+      ['Bancos e seguradoras', 'entram, porque o método usa o lucro líquido e não o EBIT'],
+    ],
+    excludeCommon: ['Bancos', 'Ordenação'],
+    tag: {
+      priceField: 'Desconto',
+      priceLabel: 'Desconto',
+      format: formatPercent,
+      lines: stock => [
+        ['Valor intrínseco de', formatCurrency(stock['Valor Intrínseco'])],
+        ['Preço teto:', formatCurrency(stock['Preço Teto'])],
+      ],
+    },
+    summary: [
+      ['desconto mediano', 'Desconto', 'median', formatPercent],
+      ['crescimento esperado médio', 'Crescimento Esperado', 'average', formatPercent],
+    ],
+    visibleColumns: ['Ranking', 'Ativo', 'Cotação', 'Valor Intrínseco', 'Preço Teto', 'Desconto'],
+    columnLabels: { 'Cotação': 'Valor atual' },
+    hideSort: true,
+    showAssumptions: true,
+    hiddenColumns: [],
   },
 };
 

@@ -1,4 +1,6 @@
-import { buildColumns, compareNullsLast, initialColumnVisibility } from './columns';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { buildColumns, compareNullsLast, initialColumnVisibility, withLabels } from './columns';
 import { FIELDS, withDerivedFields } from './fields';
 
 // Every field currently returned by GET /api/ibovespa/filtered.
@@ -6,7 +8,7 @@ const API_FIELDS = [
   'Ranking', 'Ativo', 'Empresa', 'Setor', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
   'Liquidez Média Diária', 'Data Balanço', 'Situação', 'DY Médio 5 Anos', 'Payout', 'Anos com Dividendos',
-  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV', 'Instituição Financeira', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
+  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV', 'Instituição Financeira', 'Valor Intrínseco', 'Preço Teto', 'Margem de Segurança', 'Variação do Lucro', 'Desconto', 'ROE Médio', 'Payout Médio', 'Crescimento Esperado', 'Lucro Líquido', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
 ];
 
 describe('field metadata', () => {
@@ -69,4 +71,23 @@ test('trend is the distance between price and the 200-day average', () => {
   expect(withDerivedFields({ 'Cotação': 11, MA200: 10 })['Tendência']).toBeCloseTo(10);
   expect(withDerivedFields({ 'Cotação': 9, MA200: 10 })['Tendência']).toBeCloseTo(-10);
   expect(withDerivedFields({ 'Cotação': 9, MA200: null })['Tendência']).toBeNull();
+});
+
+test('a strategy can show only its own columns, with its own names', () => {
+  const visibility = initialColumnVisibility(FIELDS, [], ['Ranking', 'Ativo', 'Cotação', 'Valor Intrínseco', 'Desconto']);
+  expect(visibility['Valor Intrínseco']).toBeUndefined();
+  expect(visibility.Desconto).toBeUndefined();
+  expect(visibility['Cotação']).toBeUndefined();
+  expect(visibility['P/L']).toBe(false);
+  expect(visibility.Setor).toBe(false);
+  const columns = buildColumns(withLabels(FIELDS, { 'Cotação': 'Valor atual' }));
+  expect(columns.find(c => c.field === 'Cotação').headerName).toBe('Valor atual');
+});
+
+test('the buy price is highlighted when the stock trades below it', () => {
+  const column = buildColumns().find(c => c.field === 'Preço Teto');
+  const cell = (price, ceiling) => column.renderCell({ value: ceiling, formattedValue: `R$ ${ceiling}`, row: { 'Cotação': price } });
+  render(<div>{cell(10, 12)}</div>);
+  expect(screen.getByTitle('Cotação abaixo do preço teto')).toHaveTextContent('R$ 12');
+  expect(cell(15, 12)).toBe('R$ 12');
 });

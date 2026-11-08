@@ -96,7 +96,17 @@ function renderTrend({ value, formattedValue }) {
   );
 }
 
+// Buy price: green when the stock already trades at or below it.
+function renderCeiling({ value, formattedValue, row }) {
+  if (!isNumber(value)) return EMPTY;
+  const below = isNumber(row['Cotação']) && row['Cotação'] <= value;
+  return below ? (
+    <Chip size="small" color="success" label={formattedValue} title="Cotação abaixo do preço teto" sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }} />
+  ) : formattedValue;
+}
+
 function rendererFor(meta) {
+  if (meta.ceiling) return renderCeiling;
   if (meta.format === 'ticker') return renderTicker;
   if (meta.format === 'rank') return renderRank;
   if (meta.format === 'situation') return renderSituation;
@@ -139,5 +149,11 @@ export function compareNullsLast(a, b) {
   return a - b;
 }
 
-export const initialColumnVisibility = (fields = FIELDS, extraHidden = []) =>
-  Object.fromEntries(fields.filter(f => f.hidden || extraHidden.includes(f.field)).map(f => [f.field, false]));
+// `visibleOnly` (a strategy's own column set) overrides the default hidden flags.
+export const initialColumnVisibility = (fields = FIELDS, extraHidden = [], visibleOnly = null) =>
+  Object.fromEntries(fields
+    .filter(f => (visibleOnly ? !visibleOnly.includes(f.field) : f.hidden || extraHidden.includes(f.field)))
+    .map(f => [f.field, false]));
+
+// Strategy-specific header names, e.g. { 'Cotação': 'Valor atual' }.
+export const withLabels = (fields, labels = {}) => fields.map(f => (labels[f.field] ? { ...f, label: labels[f.field] } : f));

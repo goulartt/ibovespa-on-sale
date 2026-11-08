@@ -5,7 +5,8 @@ import { COMMON_CRITERIA } from '../lib/strategies';
 
 
 export default function Methodology({ strategy }) {
-  const criteria = [...strategy.criteria, ...COMMON_CRITERIA];
+  const excluded = strategy.excludeCommon || [];
+  const criteria = [...strategy.criteria, ...COMMON_CRITERIA.filter(([title]) => !excluded.includes(title))];
   return (
     <Accordion disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
