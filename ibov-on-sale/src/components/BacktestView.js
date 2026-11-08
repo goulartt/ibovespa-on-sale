@@ -6,6 +6,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EquityChart from './EquityChart';
+import MoneySimulation from './MoneySimulation';
 import { fetchBacktest } from '../lib/api';
 import { BENCHMARKS, MODES, SERIES, chartSeries, runOf, signedPercent, yearlyRows } from '../lib/backtest';
 import { formatDate, formatPercent } from '../lib/format';
@@ -153,7 +154,7 @@ const LIMITATIONS = [
   ['Viés de sobrevivência', 'empresas que saíram da bolsa e não têm histórico no Yahoo Finance (cerca de um terço dos códigos desde 2014) não entram nos rankings do passado, o que tende a melhorar o resultado'],
   ['Cadastro atual', 'a situação na CVM (recuperação judicial) é a de hoje, valendo a partir da data de início informada; empresas que já saíram de uma recuperação podem ter entrado no ranking quando estavam nela'],
   ['Balanços refeitos', 'quando um balanço foi reapresentado, usamos a versão final com a data de entrega da primeira'],
-  ['Custos', '0,1% por compra e por venda; sem imposto de renda nem taxa de custódia. Proventos reinvestidos (preço ajustado). Dinheiro parado rende o CDI'],
+  ['Custos e impostos', '0,1% por compra e por venda, sem taxa de custódia. Os retornos em % (cartões, gráfico e ano a ano) são antes do imposto de renda, com proventos reinvestidos; a tabela "Com R$ 100 mil e impostos" desconta o IR das vendas, do resgate e do caixa'],
   ['Tamanho da carteira', '20 ações no Deep Value e na Qualidade a bom preço; 10 em Dividendos sustentáveis, porque poucas ações passam em todos os filtros de dividendos (de 1 a 6 por trimestre entre 2014 e 2019): com 20 posições, a maior parte da carteira ficaria em caixa'],
   ['Rotação', 'nos primeiros pregões após 5/abr, 20/mai, 20/ago e 20/nov (depois dos prazos dos balanços), vende quem saiu do dobro do tamanho da carteira no ranking (top 40, ou top 20 em Dividendos) ou deixou de passar nos filtros, e compra as mais bem colocadas que não estão na carteira'],
 ];
@@ -218,6 +219,8 @@ export default function BacktestView() {
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1 }}>Retorno acumulado</Typography>
         <EquityChart series={chartSeries(start, mode)} />
       </Paper>
+
+      <MoneySimulation period={start} mode={mode} />
 
       <Box>
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1.5 }}>Ano a ano</Typography>

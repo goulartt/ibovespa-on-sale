@@ -6,6 +6,7 @@ import EquityChart from './EquityChart';
 import { fetchBacktest } from '../lib/api';
 import { chartSeries, signedPercent, yearlyRows } from '../lib/backtest';
 import { BACKTEST } from '../fixtures/backtest';
+import { simulationRows } from './MoneySimulation';
 
 jest.mock('../lib/api', () => ({ ...jest.requireActual('../lib/api'), fetchBacktest: jest.fn() }));
 
@@ -67,4 +68,17 @@ test('long periods use a log scale', () => {
   render(<EquityChart series={long} />);
   expect(screen.getByText(/Escala logarítmica/)).toBeInTheDocument();
   expect(screen.getByRole('img', { name: /Retorno acumulado/ })).toHaveAttribute('data-scale', 'log');
+});
+
+test('the R$ 100 thousand simulation shows values after taxes, next to a CDB and an Ibovespa ETF', async () => {
+  fetchBacktest.mockResolvedValue(BACKTEST);
+  render(<BacktestView />);
+  const table = await screen.findByRole('table', { name: 'Simulação com R$ 100 mil' });
+  expect(within(table).getByText('CDB 100% do CDI')).toBeInTheDocument();
+  expect(within(table).getByText('ETF de Ibovespa')).toBeInTheDocument();
+  const rows = simulationRows(BACKTEST.periodos[0], 'rotation');
+  expect(rows.map(r => r.id)).toEqual(['deepValue', 'dividendos', 'qualidade', 'cdi', 'ibov']);
+  expect(rows[0].liquido).toBeCloseTo(125000);
+  expect(rows[3].impostosVendas).toBeNull();
+  expect(rows[3].impostoResgate).toBe(3000);
 });

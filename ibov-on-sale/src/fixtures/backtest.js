@@ -7,9 +7,11 @@ const run = (retorno, extra = {}) => ({
   carteiraAtual: ['AAAA3', 'CCCC3'],
   trocas: [{ date: '2024-05-20', sold: [{ ticker: 'BBBB4', empresa: 'B', rank: null }], bought: [{ ticker: 'CCCC3', empresa: 'C', rank: 1 }] }],
   eventos: [],
+  simulacao: { aporte: 100000, semImpostos: 100000 * (1 + retorno / 100), liquido: 100000 * (1 + retorno / 120), impostosVendas: 1000, impostoResgate: 500, proventos: 5000 },
   ...extra,
 });
 const bench = retorno => ({
+  simulacao: { semImpostos: 100000 * (1 + retorno / 100), liquido: 100000 * (1 + 0.85 * retorno / 100), impostos: 150 * retorno },
   metricas: { retorno, retornoAnual: retorno / 2, percentualCdi: 100 },
   anual: { 2024: retorno / 2, 2025: retorno / 2 },
   curva: curve(1 + retorno / 200, 1 + retorno / 100),
