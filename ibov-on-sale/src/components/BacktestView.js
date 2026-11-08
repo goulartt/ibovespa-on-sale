@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EquityChart from './EquityChart';
 import { fetchBacktest } from '../lib/api';
-import { BENCHMARKS, MODES, SERIES, VERSIONS, chartSeries, runOf, signedPercent, yearlyRows } from '../lib/backtest';
+import { BENCHMARKS, MODES, SERIES, chartSeries, runOf, signedPercent, yearlyRows } from '../lib/backtest';
 import { formatDate, formatPercent } from '../lib/format';
 import { tokens, displayFont } from '../theme';
 
@@ -64,8 +64,8 @@ function StrategyCard({ series, run, cdi, robustness, size }) {
   );
 }
 
-function YearlyTable({ start, mode, version }) {
-  const rows = yearlyRows(start, mode, version);
+function YearlyTable({ start, mode }) {
+  const rows = yearlyRows(start, mode);
   const columns = [...SERIES, ...BENCHMARKS];
   return (
     <Paper variant="outlined" sx={{ borderRadius: 1.5, overflowX: 'auto' }}>
@@ -105,11 +105,11 @@ function YearlyTable({ start, mode, version }) {
 
 const tickers = list => list.map(p => p.ticker).join(', ') || '—';
 
-function Trades({ start, mode, version }) {
+function Trades({ start, mode }) {
   return (
     <Stack spacing={1}>
       {SERIES.map(s => {
-        const run = runOf(start, s.id, version, mode);
+        const run = runOf(start, s.id, mode);
         if (!run) return null;
         return (
           <Accordion key={s.id} disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
@@ -147,7 +147,7 @@ function Trades({ start, mode, version }) {
 }
 
 const LIMITATIONS = [
-  ['Regras revisadas com este backtest', 'em nov/2026, o Deep Value passou a exigir cotação acima da média móvel de 200 pregões e a Qualidade a bom preço passou a exigir lucro estável. As regras foram escolhidas olhando só 2014 a 2019 e conferidas em 2020 até hoje, um período que não foi usado na escolha; selecione "Regras anteriores" para comparar. Mesmo assim, testamos cerca de 30 variações, então parte da diferença pode ser sorte'],
+  ['Regras revisadas com este backtest', 'em nov/2026, o Deep Value passou a exigir cotação acima da média móvel de 200 pregões e a Qualidade a bom preço passou a exigir lucro estável. As regras foram escolhidas olhando só 2014 a 2019 e conferidas em 2020 até hoje, um período que não foi usado na escolha. Sem elas, de 2014 até hoje o Deep Value teria rendido 17,5% ao ano (contra 23,4%) e a Qualidade 9,4% (contra 12,0%), abaixo do CDI. Mesmo assim, testamos cerca de 30 variações, então parte da diferença pode ser sorte'],
   ['Número de ações', 'antes de 2020, vem do histórico do capital social no Formulário de Referência da CVM (aumentos, desdobramentos e grupamentos aprovados até cada data), sem descontar ações em tesouraria'],
   ['Sem olhar o futuro', 'em cada data, o ranking usa só os balanços já entregues à CVM (data de recebimento), cotações e proventos até o pregão anterior; as compras e vendas acontecem no fechamento'],
   ['Viés de sobrevivência', 'empresas que saíram da bolsa e não têm histórico no Yahoo Finance (cerca de um terço dos códigos desde 2014) não entram nos rankings do passado, o que tende a melhorar o resultado'],
@@ -162,7 +162,6 @@ export default function BacktestView() {
   const { data, loading, error, retry } = useBacktest();
   const [periodId, setPeriodId] = useState(null);
   const [mode, setMode] = useState(MODES.rotation.id);
-  const [version, setVersion] = useState(VERSIONS.novas.id);
 
   if (error) {
     return (
@@ -187,7 +186,7 @@ export default function BacktestView() {
   const sizeText = exceptions.length
     ? `as ${sizeOf(SERIES[0].id)} primeiras do ranking (${exceptions.map(s => `${sizeOf(s.id)} em ${s.label}`).join(', ')})`
     : `as ${sizes[0]} primeiras do ranking`;
-  const robustness = (strategy) => (start.id === data.periodos[0].id ? data.robustez?.[strategy]?.[version]?.[mode] : null);
+  const robustness = (strategy) => (start.id === data.periodos[0].id ? data.robustez?.[strategy]?.[mode] : null);
   const cdi = start.benchmarks.cdi;
   const ibov = start.benchmarks.ibov;
 
@@ -200,9 +199,6 @@ export default function BacktestView() {
         <ToggleButtonGroup exclusive size="small" value={mode} onChange={(e, v) => v && setMode(v)} aria-label="Modo">
           {Object.values(MODES).map(m => <ToggleButton key={m.id} value={m.id}>{m.label}</ToggleButton>)}
         </ToggleButtonGroup>
-        <ToggleButtonGroup exclusive size="small" value={version} onChange={(e, v) => v && setVersion(v)} aria-label="Regras">
-          {Object.values(VERSIONS).map(v => <ToggleButton key={v.id} value={v.id}>{v.label}</ToggleButton>)}
-        </ToggleButtonGroup>
       </Stack>
 
       <Typography sx={{ fontSize: 18, maxWidth: '75ch' }}>
@@ -213,26 +209,26 @@ export default function BacktestView() {
       </Typography>
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
-        {SERIES.map(s => runOf(start, s.id, version, mode) && (
-          <StrategyCard key={s.id} series={s} run={runOf(start, s.id, version, mode)} cdi={cdi} robustness={robustness(s.id)} size={sizeOf(s.id)} />
+        {SERIES.map(s => runOf(start, s.id, mode) && (
+          <StrategyCard key={s.id} series={s} run={runOf(start, s.id, mode)} cdi={cdi} robustness={robustness(s.id)} size={sizeOf(s.id)} />
         ))}
       </Box>
 
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 1.5 }}>
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1 }}>Retorno acumulado</Typography>
-        <EquityChart series={chartSeries(start, mode, version)} />
+        <EquityChart series={chartSeries(start, mode)} />
       </Paper>
 
       <Box>
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1.5 }}>Ano a ano</Typography>
-        <YearlyTable start={start} mode={mode} version={version} />
+        <YearlyTable start={start} mode={mode} />
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
           Em negrito, os anos em que a estratégia bateu o CDI.
           {start.id === data.periodos[0].id && ` "Inícios acima do CDI": de ${data.robustez?.anos?.length ?? 0} carteiras, uma começando em cada janeiro desde ${data.robustez?.anos?.[0] ?? ''} e mantida até hoje, quantas renderam mais que o CDI.`}
         </Typography>
       </Box>
 
-      <Trades start={start} mode={mode} version={version} />
+      <Trades start={start} mode={mode} />
 
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 1.5, bgcolor: tokens.paper }}>
         <Typography sx={{ fontWeight: 600, mb: 1 }}>Como o backtest foi feito e suas limitações</Typography>

@@ -31,11 +31,7 @@ test('switching the start year and the mode updates the numbers', async () => {
 
   expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('Inícios acima do CDI10 de 12');
 
-  userEvent.click(screen.getByRole('button', { name: 'Regras anteriores' }));
-  expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('+20,00%');
-  expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('7 de 12');
-
-  userEvent.click(screen.getByRole('button', { name: 'Regras atuais' }));
+  expect(screen.queryByRole('button', { name: 'Regras anteriores' })).not.toBeInTheDocument();
   userEvent.click(screen.getByRole('button', { name: '2020 até hoje (validação)' }));
   expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('+60,00%');
   expect(screen.getByRole('article', { name: 'Deep Value' })).not.toHaveTextContent('Inícios acima do CDI');

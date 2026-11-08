@@ -14,10 +14,7 @@ const bench = retorno => ({
   anual: { 2024: retorno / 2, 2025: retorno / 2 },
   curva: curve(1 + retorno / 200, 1 + retorno / 100),
 });
-const versions = (rotation, hold) => ({
-  novas: { rotation: run(rotation), buyAndHold: run(hold, { trocas: [] }) },
-  anteriores: { rotation: run(rotation - 10), buyAndHold: run(hold - 10, { trocas: [] }) },
-});
+const versions = (rotation, hold) => ({ rotation: run(rotation), buyAndHold: run(hold, { trocas: [] }) });
 const period = (id, label, mult) => ({
   id,
   label,
@@ -30,7 +27,7 @@ const period = (id, label, mult) => ({
     qualidade: versions(-5 * mult, 8 * mult),
   },
 });
-const robust = { novas: { rotation: { acimaCdi: 10, total: 12 }, buyAndHold: { acimaCdi: 6, total: 12 } }, anteriores: { rotation: { acimaCdi: 7, total: 12 }, buyAndHold: { acimaCdi: 5, total: 12 } } };
+const robust = { rotation: { acimaCdi: 10, total: 12 }, buyAndHold: { acimaCdi: 6, total: 12 } };
 
 export const BACKTEST = {
   updatedAt: '2026-11-08T12:00:00.000Z',
