@@ -32,3 +32,20 @@ export async function fetchRanking({ strategy = 'deepValue', sort = SORTS.evEbit
   if (!Array.isArray(stocks)) throw new ApiError('Resposta inesperada da API.');
   return { stocks, updatedAt: response.headers.get('X-Data-Updated-At') };
 }
+
+// Results of the backtest (scripts/backtest.js in the API repository).
+export async function fetchBacktest({ signal, fetchImpl = fetch } = {}) {
+  let response;
+  try {
+    response = await fetchImpl(`${API_URL}/api/backtest`, { signal });
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    throw new ApiError('Não foi possível conectar à API. Verifique sua conexão.');
+  }
+  if (!response.ok) {
+    throw new ApiError('O backtest está indisponível no momento. Tente novamente em instantes.', response.status);
+  }
+  const data = await response.json();
+  if (!data || !Array.isArray(data.inicios)) throw new ApiError('Resposta inesperada da API.');
+  return data;
+}

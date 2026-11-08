@@ -12,7 +12,10 @@ import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
 import SortSelector from './components/SortSelector';
 import SectorFilter, { ALL_SECTORS, filterBySector } from './components/SectorFilter';
-import { STRATEGIES, strategyFromHash } from './lib/strategies';
+import BacktestView from './components/BacktestView';
+import { BACKTEST_VIEW, STRATEGIES, viewFromHash } from './lib/strategies';
+
+const VIEWS = { ...STRATEGIES, [BACKTEST_VIEW.id]: BACKTEST_VIEW };
 
 function useRanking(strategy, sort) {
   const [state, setState] = useState({ stocks: [], updatedAt: null, loading: true, error: null });
@@ -33,11 +36,11 @@ function useRanking(strategy, sort) {
   return { ...state, retry };
 }
 
-// Selected strategy lives in the URL hash (#qualidade) so a link opens the same ranking.
-function useStrategy() {
-  const [id, setId] = useState(() => strategyFromHash(window.location.hash));
+// Selected strategy (or the backtest) lives in the URL hash (#qualidade) so a link opens the same view.
+function useView() {
+  const [id, setId] = useState(() => viewFromHash(window.location.hash));
   useEffect(() => {
-    const onHashChange = () => setId(strategyFromHash(window.location.hash));
+    const onHashChange = () => setId(viewFromHash(window.location.hash));
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -45,27 +48,27 @@ function useStrategy() {
     window.history.replaceState(null, '', `#${next}`);
     setId(next);
   }, []);
-  return [STRATEGIES[id], select];
+  return [VIEWS[id], select];
 }
 
-function Header({ updatedAt, strategy, onStrategyChange }) {
+function Header({ updatedAt, view, onViewChange }) {
   return (
     <Box component="header" sx={{ pt: { xs: 5, md: 8 }, pb: { xs: 4, md: 5 } }}>
       <Typography variant="h1" sx={{ fontSize: { xs: 56, sm: 80, md: 104 } }}>
         Ibovespa em Promoção
       </Typography>
       <Typography sx={{ mt: 2, maxWidth: '62ch', fontSize: { xs: 16, md: 18 }, color: 'text.secondary' }}>
-        {strategy.lede}
+        {view.lede}
       </Typography>
       <Tabs
-        value={strategy.id}
-        onChange={(event, next) => onStrategyChange(next)}
+        value={view.id}
+        onChange={(event, next) => onViewChange(next)}
         aria-label="Estratégia"
         variant="scrollable"
         allowScrollButtonsMobile
         sx={{ mt: 3, borderBottom: 1, borderColor: 'divider', '& .MuiTab-root': { fontSize: 16, fontWeight: 600, px: 0, mr: 4, minWidth: 0 } }}
       >
-        {Object.values(STRATEGIES).map(s => <Tab key={s.id} value={s.id} label={s.label} />)}
+        {Object.values(VIEWS).map(s => <Tab key={s.id} value={s.id} label={s.label} />)}
       </Tabs>
       {updatedAt && (
         <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
@@ -76,58 +79,72 @@ function Header({ updatedAt, strategy, onStrategyChange }) {
   );
 }
 
-export default function App() {
-  const [strategy, setStrategy] = useStrategy();
-  const [sort, setSort] = useState(SORTS.evEbit);
+function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
   const [sector, setSector] = useState(ALL_SECTORS);
   const { stocks, updatedAt, loading, error, retry } = useRanking(strategy.id, sort);
   const allRows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
   const rows = useMemo(() => filterBySector(allRows, sector), [allRows, sector]);
+  useEffect(() => { onUpdatedAt(updatedAt); }, [updatedAt, onUpdatedAt]);
+
+  return (
+    <>
+      {error ? (
+        <Alert
+          severity="error"
+          action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={retry}>Tentar novamente</Button>}
+        >
+          {error}
+        </Alert>
+      ) : (
+        <Stack spacing={{ xs: 4, md: 5 }}>
+          <Stack spacing={2}>
+            <SortSelector value={sort} onChange={setSort} disabled={loading} />
+            {!loading && <SectorFilter stocks={allRows} value={sector} onChange={setSector} />}
+          </Stack>
+          {!loading && rows.length === 0 ? (
+            <Alert severity="info">
+              Nenhuma ação passou em todos os filtros hoje. Veja os critérios logo abaixo.
+            </Alert>
+          ) : (
+            <>
+              <PriceTags stocks={rows} loading={loading} sector={sector} strategy={strategy} />
+              <Summary stocks={rows} loading={loading} sector={sector} strategy={strategy} />
+              <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
+                <StocksTable key={strategy.id} stocks={rows} loading={loading} hiddenColumns={strategy.hiddenColumns} />
+              </Paper>
+            </>
+          )}
+        </Stack>
+      )}
+      <Box sx={{ mt: 4 }}>
+        <Methodology strategy={strategy} />
+      </Box>
+    </>
+  );
+}
+
+export default function App() {
+  const [view, setView] = useView();
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [sort, setSort] = useState(SORTS.evEbit);
+  const isBacktest = view.id === BACKTEST_VIEW.id;
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container maxWidth="xl">
-        <Header updatedAt={updatedAt} strategy={strategy} onStrategyChange={next => { setStrategy(next); setSector(ALL_SECTORS); }} />
+        <Header updatedAt={isBacktest ? null : updatedAt} view={view} onViewChange={setView} />
         <Box component="main" sx={{ pb: 8 }}>
-          {error ? (
-            <Alert
-              severity="error"
-              action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={retry}>Tentar novamente</Button>}
-            >
-              {error}
-            </Alert>
-          ) : (
-            <Stack spacing={{ xs: 4, md: 5 }}>
-              <Stack spacing={2}>
-                <SortSelector value={sort} onChange={setSort} disabled={loading} />
-                {!loading && <SectorFilter stocks={allRows} value={sector} onChange={setSector} />}
-              </Stack>
-              {!loading && rows.length === 0 ? (
-                <Alert severity="info">
-                  Nenhuma ação passou em todos os filtros hoje. Veja os critérios logo abaixo.
-                </Alert>
-              ) : (
-                <>
-                  <PriceTags stocks={rows} loading={loading} sector={sector} strategy={strategy} />
-                  <Summary stocks={rows} loading={loading} sector={sector} strategy={strategy} />
-                  <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
-                    <StocksTable key={strategy.id} stocks={rows} loading={loading} hiddenColumns={strategy.hiddenColumns} />
-                  </Paper>
-                </>
-              )}
-            </Stack>
-          )}
-          <Box sx={{ mt: 4 }}>
-            <Methodology strategy={strategy} />
-          </Box>
+          {isBacktest
+            ? <BacktestView />
+            : <RankingView key={view.id} strategy={view} sort={sort} onSortChange={setSort} onUpdatedAt={setUpdatedAt} />}
         </Box>
       </Container>
       <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', py: 3 }}>
         <Container maxWidth="xl">
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
             <Typography variant="body2" color="text.secondary">
-              Dados da CVM e do Yahoo Finance. Conteúdo informativo, não é recomendação de investimento.
+              Dados da CVM, do Yahoo Finance e do Banco Central. Conteúdo informativo, não é recomendação de investimento.
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Feito por{' '}

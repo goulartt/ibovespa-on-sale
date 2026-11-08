@@ -1,4 +1,4 @@
-import { STRATEGIES, strategyFromHash } from './strategies';
+import { STRATEGIES, strategyFromHash, viewFromHash } from './strategies';
 import { FIELDS } from './fields';
 
 test('reads the strategy from the URL hash, defaulting to dividends', () => {
@@ -20,4 +20,10 @@ test('every strategy refers to existing fields', () => {
     expect(s.summary.map(([, field]) => field).filter(f => !known.has(f))).toEqual([]);
     expect(s.criteria.length).toBeGreaterThan(2);
   }
+});
+
+test('the backtest tab has its own hash', () => {
+  expect(viewFromHash('#backtest')).toBe('backtest');
+  expect(viewFromHash('#qualidade')).toBe('qualidade');
+  expect(viewFromHash('')).toBe('deepValue');
 });

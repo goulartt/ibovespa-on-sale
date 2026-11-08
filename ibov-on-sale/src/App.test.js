@@ -2,11 +2,13 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { fetchRanking } from './lib/api';
+import { fetchBacktest, fetchRanking } from './lib/api';
+import { BACKTEST } from './fixtures/backtest';
 
 jest.mock('./lib/api', () => ({
   ...jest.requireActual('./lib/api'),
   fetchRanking: jest.fn(),
+  fetchBacktest: jest.fn(),
 }));
 
 const STOCKS = [
@@ -28,7 +30,7 @@ test('shows the summary and the ranking', async () => {
   expect(screen.getByRole('article', { name: '2º lugar: BBBB4' })).toBeInTheDocument();
   expect(screen.getByText('Empresa A')).toBeInTheDocument(); // readable company name on the tag
   expect(screen.getByText('Ibovespa em Promoção')).toBeInTheDocument();
-  expect(screen.getByText(/Atualizado em 05\/11\/2026/)).toBeInTheDocument();
+  expect(await screen.findByText(/Atualizado em 05\/11\/2026/)).toBeInTheDocument();
   expect(screen.getAllByText('30,00%').length).toBeGreaterThan(0); // average EBIT/EV in the summary (Deep Value)
   expect(screen.getAllByText('4,00x').length).toBeGreaterThan(0); // median EV/EBIT
 });
@@ -99,4 +101,15 @@ test('shows an error with a retry button', async () => {
   await waitFor(() => expect(fetchRanking).toHaveBeenCalledTimes(2));
   expect(await screen.findByRole('article', { name: '1º lugar: AAAA3' })).toBeInTheDocument();
   expect(screen.queryByText('A API está indisponível no momento.')).not.toBeInTheDocument();
+});
+
+test('opens the backtest tab', async () => {
+  fetchRanking.mockResolvedValue({ stocks: STOCKS, updatedAt: null });
+  fetchBacktest.mockResolvedValue(BACKTEST);
+  render(<App />);
+  await screen.findByRole('article', { name: '1º lugar: AAAA3' });
+
+  userEvent.click(screen.getByRole('tab', { name: 'Backtest' }));
+  expect(await screen.findByRole('article', { name: 'Dividendos sustentáveis' })).toBeInTheDocument();
+  expect(window.location.hash).toBe('#backtest');
 });

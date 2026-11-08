@@ -93,6 +93,18 @@ export const COMMON_CRITERIA = [
 
 export const DEFAULT_STRATEGY = 'deepValue';
 
+// The backtest tab is a view of its own, after the strategies.
+export const BACKTEST_VIEW = {
+  id: 'backtest',
+  label: 'Backtest',
+  lede: 'Quanto teriam rendido as 10 primeiras de cada estratégia desde 2023, 2024 e 2025, comparadas com o CDI e o Ibovespa, recalculando os rankings só com o que era público em cada data.',
+};
+
+export function viewFromHash(hash) {
+  const id = String(hash || '').replace(/^#/, '');
+  return id === BACKTEST_VIEW.id ? id : strategyFromHash(hash);
+}
+
 export function strategyFromHash(hash) {
   const id = String(hash || '').replace(/^#/, '');
   return STRATEGIES[id] ? id : DEFAULT_STRATEGY;
