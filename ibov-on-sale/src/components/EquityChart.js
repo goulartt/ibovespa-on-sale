@@ -37,6 +37,14 @@ function niceTicks(min, max, count = 5) {
 }
 
 const TOOLTIP_WIDTH = 220;
+const LOG_SCALE_RATIO = 4;
+
+// Growth factors for log-scale gridlines: 0.5x, 1x (0%), 2x, 4x... (+ 1.5x / 3x when the range is short).
+function logTicks(fMin, fMax) {
+  const base = [0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
+  const ticks = base.filter(f => f >= fMin * 0.98 && f <= fMax * 1.02);
+  return ticks.length >= 4 ? ticks : [...ticks, 1.5, 3, 6, 12].filter(f => f >= fMin && f <= fMax).sort((a, b) => a - b);
+}
 
 // Next to the crosshair on wide charts; centered on it (but inside the chart) on phones.
 function tooltipPosition(px, width) {
@@ -63,24 +71,40 @@ export default function EquityChart({ series }) {
   const dates = useMemo(() => series[0]?.points.map(p => p[0]) || [], [series]);
 
   const geometry = useMemo(() => {
-    const all = series.flatMap(s => s.points.map(p => toPct(p[1])));
-    const min = Math.min(0, ...all);
-    const max = Math.max(0, ...all);
-    const pad = (max - min) * 0.06 || 1;
-    const yMin = min - pad;
-    const yMax = max + pad;
+    const factors = series.flatMap(s => s.points.map(p => p[1])).filter(v => v > 0);
+    const fMin = Math.min(1, ...factors);
+    const fMax = Math.max(1, ...factors);
+    // Long periods: log scale, so equal distances are equal percentage changes and a big winner
+    // doesn't flatten the other lines.
+    const log = fMax / fMin > LOG_SCALE_RATIO;
     const n = Math.max(dates.length - 1, 1);
     const x = i => M.left + (i / n) * (W - M.left - M.right);
-    const y = v => M.top + ((yMax - v) / (yMax - yMin)) * (H - M.top - M.bottom);
+    let y;
+    let ticks;
+    if (log) {
+      const lMin = Math.log(fMin) - 0.05;
+      const lMax = Math.log(fMax) + 0.05;
+      y = v => M.top + ((lMax - Math.log(1 + v / 100)) / (lMax - lMin)) * (H - M.top - M.bottom);
+      ticks = logTicks(fMin, fMax).map(f => Math.round((f - 1) * 100));
+    } else {
+      const min = toPct(fMin);
+      const max = toPct(fMax);
+      const pad = (max - min) * 0.06 || 1;
+      const yMin = min - pad;
+      const yMax = max + pad;
+      y = v => M.top + ((yMax - v) / (yMax - yMin)) * (H - M.top - M.bottom);
+      ticks = niceTicks(yMin, yMax, H < 300 ? 4 : 5);
+    }
     const years = dates
       .map((d, i) => [d.slice(0, 4), i])
       .filter(([yr], i, arr) => i === 0 || yr !== arr[i - 1][0])
-      .filter(([, i], k, arr) => k === 0 || x(i) - x(arr[k - 1][1]) > 40);
-    return { x, y, ticks: niceTicks(yMin, yMax, H < 300 ? 4 : 5), years };
+      // skip labels that would overlap the last one shown
+      .reduce((shown, year) => (shown.length && x(year[1]) - x(shown[shown.length - 1][1]) < 40 ? shown : [...shown, year]), []);
+    return { x, y, ticks, years, log };
   }, [series, dates, W, H]);
 
   if (dates.length < 2) return null;
-  const { x, y, ticks, years } = geometry;
+  const { x, y, ticks, years, log } = geometry;
 
   const labels = spreadLabels(series.map(s => {
     const last = s.points[s.points.length - 1][1];
@@ -121,6 +145,7 @@ export default function EquityChart({ series }) {
         onMouseMove={onMove}
         onMouseLeave={() => setHover(null)}
         style={{ display: 'block', touchAction: 'pan-y' }}
+        data-scale={log ? 'log' : 'linear'}
       >
         {ticks.map(t => (
           <g key={t}>
@@ -164,6 +189,11 @@ export default function EquityChart({ series }) {
           </g>
         )}
       </svg>
+      {log && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          Escala logarítmica: a mesma distância vertical representa a mesma variação percentual (de 0% a +100% é o mesmo que de +100% a +300%).
+        </Typography>
+      )}
       {hover && (
         <Box
           role="status"

@@ -10,20 +10,31 @@ const run = (retorno, extra = {}) => ({
   ...extra,
 });
 const bench = retorno => ({
-  metricas: { retorno, percentualCdi: 100 },
+  metricas: { retorno, retornoAnual: retorno / 2, percentualCdi: 100 },
   anual: { 2024: retorno / 2, 2025: retorno / 2 },
   curva: curve(1 + retorno / 200, 1 + retorno / 100),
 });
-const start = (ano, mult) => ({
-  ano,
-  inicio: `${ano}-01-02`,
+const versions = (rotation, hold) => ({
+  novas: { rotation: run(rotation), buyAndHold: run(hold, { trocas: [] }) },
+  anteriores: { rotation: run(rotation - 10), buyAndHold: run(hold - 10, { trocas: [] }) },
+});
+const period = (id, label, mult) => ({
+  id,
+  label,
+  inicio: '2024-01-02',
   fim: '2026-11-06',
   benchmarks: { cdi: bench(20), ibov: bench(10) },
   estrategias: {
-    deepValue: { rotation: run(30 * mult), buyAndHold: run(12 * mult, { trocas: [] }) },
-    dividendos: { rotation: run(40 * mult), buyAndHold: run(25 * mult, { trocas: [] }) },
-    qualidade: { rotation: run(-5 * mult), buyAndHold: run(8 * mult, { trocas: [] }) },
+    deepValue: versions(30 * mult, 12 * mult),
+    dividendos: versions(40 * mult, 25 * mult),
+    qualidade: versions(-5 * mult, 8 * mult),
   },
 });
+const robust = { novas: { rotation: { acimaCdi: 10, total: 12 }, buyAndHold: { acimaCdi: 6, total: 12 } }, anteriores: { rotation: { acimaCdi: 7, total: 12 }, buyAndHold: { acimaCdi: 5, total: 12 } } };
 
-export const BACKTEST = { updatedAt: '2026-11-08T12:00:00.000Z', inicios: [start(2024, 1), start(2025, 2)] };
+export const BACKTEST = {
+  updatedAt: '2026-11-08T12:00:00.000Z',
+  parametros: { size: 20, buffer: 40 },
+  periodos: [period('completo', '2014 até hoje', 1), period('validacao', '2020 até hoje (validação)', 2)],
+  robustez: { anos: [2014, 2015], deepValue: robust, dividendos: robust, qualidade: robust },
+};

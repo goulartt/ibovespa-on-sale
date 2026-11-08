@@ -46,7 +46,7 @@ export async function fetchBacktest({ signal, fetchImpl = fetch } = {}) {
     throw new ApiError('O backtest está indisponível no momento. Tente novamente em instantes.', response.status);
   }
   const data = await response.json();
-  if (!data || !Array.isArray(data.inicios)) throw new ApiError('Resposta inesperada da API.');
+  if (!data || !Array.isArray(data.periodos)) throw new ApiError('Resposta inesperada da API.');
   return data;
 }
 

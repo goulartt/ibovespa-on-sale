@@ -5,12 +5,13 @@ export const STRATEGIES = {
   deepValue: {
     id: 'deepValue',
     label: 'Deep Value',
-    lede: 'As ações mais baratas da bolsa pelo lucro operacional: quanto maior o EBIT em relação ao valor da empresa (EBIT/EV), mais barata. Só com filtros básicos, para uma carteira diversificada de cerca de 20 ações e visão de longo prazo.',
+    lede: 'As ações mais baratas da bolsa pelo lucro operacional (maior EBIT/EV) que já estão em tendência de alta, acima da média de 200 pregões. Para uma carteira diversificada de cerca de 20 ações, revista a cada trimestre.',
     criteria: [
       ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
       ['Lucro operacional', 'EBIT positivo nos últimos 12 meses'],
       ['Sem bancos e seguradoras', 'bancos, seguradoras e holdings financeiras (como Itaúsa e Caixa Seguridade) ficam de fora, porque o resultado financeiro é a própria operação delas; corretoras de seguros continuam'],
-      ['Atenção', 'o ranking é automático: antes de comprar, confira nos balanços (veja a coluna "Lucro 5 anos") se o EBIT não foi inflado por eventos não recorrentes, como venda de ativos. A estratégia pede cerca de 20 ações ao mesmo tempo, porque pode ter anos ruins'],
+      ['Tendência de alta', 'cotação acima da média móvel dos últimos 200 pregões: ações baratas que já voltaram a subir, em vez de baratas ainda em queda. No backtest de 2014 até hoje, foi a única mudança que melhorou tanto o período usado para escolher as regras (2014 a 2019) quanto o de validação (2020 até hoje)'],
+      ['Atenção', 'o ranking é automático: antes de comprar, confira nos balanços (veja a coluna "Lucro 5 anos") se o EBIT não foi inflado por eventos não recorrentes, como venda de ativos. A estratégia pede cerca de 20 ações ao mesmo tempo e revisão a cada trimestre (vender quem sai do top 40), porque pode ter anos ruins e quedas fortes'],
     ],
     tag: {
       priceField: 'EBIT/EV',
@@ -62,11 +63,12 @@ export const STRATEGIES = {
   qualidade: {
     id: 'qualidade',
     label: 'Qualidade a bom preço',
-    lede: 'Empresas muito rentáveis (ROCE acima de 15%), com pouca dívida (menos de 1,5 ano de EBITDA) e negociadas a no máximo 15 vezes o lucro: negócios excelentes, financeiramente sólidos e com desconto.',
+    lede: 'Empresas muito rentáveis (ROCE acima de 15%), com lucro estável, pouca dívida (menos de 1,5 ano de EBITDA) e negociadas a no máximo 15 vezes o lucro: negócios excelentes, financeiramente sólidos e com desconto.',
     criteria: [
       ['Liquidez', 'mais de R$ 1 milhão negociado por dia, em média, nos últimos 3 meses'],
       ['Rentabilidade', 'ROCE acima de 15%: EBIT dos últimos 12 meses dividido pelo capital empregado médio (patrimônio líquido + passivo não circulante, média entre o último balanço e o do fim do ano anterior)'],
       ['Endividamento', 'dívida líquida menor que 1,5 vez o EBITDA dos últimos 12 meses; caixa líquido (dívida negativa) é ainda melhor'],
+      ['Lucro estável', 'lucro em todos os últimos balanços anuais (pelo menos 3), variando até 50% em torno da média. Sem essa regra, a lista comprava empresas cíclicas (siderurgia, mineração) no pico do lucro, quando o ROCE é alto e o P/L baixo logo antes de o lucro cair; no backtest de 2014 até hoje, a regra levou a estratégia de abaixo para acima do CDI'],
       ['Preço', 'P/L entre 0 e 15, cerca de 25% de desconto sobre um múltiplo de mercado de 20 vezes, usando um múltiplo histórico como referência de compra em vez de projeções otimistas'],
     ],
     tag: {
@@ -136,7 +138,7 @@ export const DEFAULT_STRATEGY = 'deepValue';
 export const BACKTEST_VIEW = {
   id: 'backtest',
   label: 'Backtest',
-  lede: 'Quanto teriam rendido as 10 primeiras de cada estratégia desde 2023, 2024 e 2025, comparadas com o CDI e o Ibovespa, recalculando os rankings só com o que era público em cada data.',
+  lede: 'Quanto teriam rendido as 20 primeiras de cada estratégia desde 2014, comparadas com o CDI e o Ibovespa, recalculando os rankings só com o que era público em cada data.',
 };
 
 export function viewFromHash(hash) {

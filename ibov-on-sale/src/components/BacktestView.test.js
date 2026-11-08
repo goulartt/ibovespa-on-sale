@@ -26,8 +26,16 @@ test('switching the start year and the mode updates the numbers', async () => {
   render(<BacktestView />);
   await screen.findByRole('article', { name: 'Deep Value' });
 
-  userEvent.click(screen.getByRole('button', { name: 'Desde 2025' }));
+  expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('Inícios acima do CDI10 de 12');
+
+  userEvent.click(screen.getByRole('button', { name: 'Regras anteriores' }));
+  expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('+20,00%');
+  expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('7 de 12');
+
+  userEvent.click(screen.getByRole('button', { name: 'Regras atuais' }));
+  userEvent.click(screen.getByRole('button', { name: '2020 até hoje (validação)' }));
   expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('+60,00%');
+  expect(screen.getByRole('article', { name: 'Deep Value' })).not.toHaveTextContent('Inícios acima do CDI');
 
   userEvent.click(screen.getByRole('button', { name: 'Comprar e segurar' }));
   expect(screen.getByRole('article', { name: 'Deep Value' })).toHaveTextContent('+24,00%');
@@ -41,7 +49,7 @@ test('shows an error with a retry button', async () => {
 });
 
 test('the chart draws one line per strategy and benchmark', () => {
-  render(<EquityChart series={chartSeries(BACKTEST.inicios[0], 'rotation')} />);
+  render(<EquityChart series={chartSeries(BACKTEST.periodos[0], 'rotation')} />);
   for (const id of ['deepValue', 'dividendos', 'qualidade', 'cdi', 'ibov']) {
     expect(screen.getByTestId(`line-${id}`)).toBeInTheDocument();
   }
@@ -52,5 +60,12 @@ test('helpers', () => {
   expect(signedPercent(3.456)).toBe('+3,46%');
   expect(signedPercent(-1)).toBe('-1,00%');
   expect(signedPercent(null)).toBe('—');
-  expect(yearlyRows(BACKTEST.inicios[0], 'rotation')[0]).toEqual({ year: '2024', deepValue: 25, dividendos: 35, qualidade: -10, cdi: 10, ibov: 5 });
+  expect(yearlyRows(BACKTEST.periodos[0], 'rotation')[0]).toEqual({ year: '2024', deepValue: 25, dividendos: 35, qualidade: -10, cdi: 10, ibov: 5 });
+});
+
+test('long periods use a log scale', () => {
+  const long = [{ id: 'a', label: 'A', color: '#000', points: [['2014-01-02', 1], ['2020-01-02', 3], ['2026-01-02', 12]] }];
+  render(<EquityChart series={long} />);
+  expect(screen.getByText(/Escala logarítmica/)).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: /Retorno acumulado/ })).toHaveAttribute('data-scale', 'log');
 });

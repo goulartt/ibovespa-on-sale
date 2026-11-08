@@ -16,11 +16,19 @@ export const MODES = {
   buyAndHold: { id: 'buyAndHold', label: 'Comprar e segurar' },
 };
 
-// Lines for the chart: the 3 strategies in the chosen mode + CDI + Ibovespa.
-export function chartSeries(start, mode) {
+export const VERSIONS = {
+  novas: { id: 'novas', label: 'Regras atuais' },
+  anteriores: { id: 'anteriores', label: 'Regras anteriores' },
+};
+
+// Result of one strategy in a period, for a rules version and a mode (or null).
+export const runOf = (period, strategy, version, mode) => period.estrategias[strategy]?.[version]?.[mode] ?? null;
+
+// Lines for the chart: the 3 strategies in the chosen version/mode + CDI + Ibovespa.
+export function chartSeries(start, mode, version = 'novas') {
   const strategies = SERIES
-    .filter(s => start.estrategias[s.id])
-    .map(s => ({ ...s, points: start.estrategias[s.id][mode].curva }));
+    .filter(s => runOf(start, s.id, version, mode))
+    .map(s => ({ ...s, points: runOf(start, s.id, version, mode).curva }));
   const benchmarks = BENCHMARKS
     .filter(b => start.benchmarks[b.id])
     .map(b => ({ ...b, points: start.benchmarks[b.id].curva }));
@@ -28,11 +36,11 @@ export function chartSeries(start, mode) {
 }
 
 // Rows of the year-by-year table: { year, deepValue, dividendos, qualidade, cdi, ibov }.
-export function yearlyRows(start, mode) {
+export function yearlyRows(start, mode, version = 'novas') {
   const years = Object.keys(start.benchmarks.cdi.anual).sort();
   return years.map(year => {
     const row = { year };
-    for (const s of SERIES) row[s.id] = start.estrategias[s.id]?.[mode]?.anual?.[year] ?? null;
+    for (const s of SERIES) row[s.id] = runOf(start, s.id, version, mode)?.anual?.[year] ?? null;
     for (const b of BENCHMARKS) row[b.id] = start.benchmarks[b.id]?.anual?.[year] ?? null;
     return row;
   });

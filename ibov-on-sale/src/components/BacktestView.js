@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EquityChart from './EquityChart';
 import { fetchBacktest } from '../lib/api';
-import { BENCHMARKS, MODES, SERIES, chartSeries, signedPercent, yearlyRows } from '../lib/backtest';
+import { BENCHMARKS, MODES, SERIES, VERSIONS, chartSeries, runOf, signedPercent, yearlyRows } from '../lib/backtest';
 import { formatDate, formatPercent } from '../lib/format';
 import { tokens, displayFont } from '../theme';
 
@@ -30,7 +30,7 @@ function useBacktest() {
 
 const valueColor = v => (typeof v !== 'number' ? 'text.primary' : v >= 0 ? 'success.main' : 'error.main');
 
-function StrategyCard({ series, run, cdi }) {
+function StrategyCard({ series, run, cdi, robustness }) {
   const m = run.metricas;
   const beat = m.retorno > cdi.metricas.retorno;
   return (
@@ -51,6 +51,7 @@ function StrategyCard({ series, run, cdi }) {
           ['Maior queda', formatPercent(m.maxDrawdown)],
           ['Volatilidade', `${formatPercent(m.volatilidade)} a.a.`],
           ['Operações', String(m.operacoes)],
+          ...(robustness ? [['Inícios acima do CDI', `${robustness.acimaCdi} de ${robustness.total}`]] : []),
         ].map(([k, v]) => (
           <React.Fragment key={k}>
             <Box component="dt" sx={{ color: 'text.secondary' }}>{k}</Box>
@@ -62,8 +63,8 @@ function StrategyCard({ series, run, cdi }) {
   );
 }
 
-function YearlyTable({ start, mode }) {
-  const rows = yearlyRows(start, mode);
+function YearlyTable({ start, mode, version }) {
+  const rows = yearlyRows(start, mode, version);
   const columns = [...SERIES, ...BENCHMARKS];
   return (
     <Paper variant="outlined" sx={{ borderRadius: 1.5, overflowX: 'auto' }}>
@@ -78,7 +79,7 @@ function YearlyTable({ start, mode }) {
           {rows.map((row, i) => (
             <TableRow key={row.year}>
               <TableCell component="th" scope="row">
-                {row.year}{i === 0 && start.inicio.slice(5) !== '01-02' ? '*' : ''}{i === rows.length - 1 ? ' (até agora)' : ''}
+                {row.year}{i === rows.length - 1 && start.fim.slice(5) < '12-20' ? ' (até agora)' : ''}
               </TableCell>
               {columns.map(c => (
                 <TableCell
@@ -103,11 +104,11 @@ function YearlyTable({ start, mode }) {
 
 const tickers = list => list.map(p => p.ticker).join(', ') || '—';
 
-function Trades({ start, mode }) {
+function Trades({ start, mode, version }) {
   return (
     <Stack spacing={1}>
       {SERIES.map(s => {
-        const run = start.estrategias[s.id]?.[mode];
+        const run = runOf(start, s.id, version, mode);
         if (!run) return null;
         return (
           <Accordion key={s.id} disableGutters elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
@@ -145,18 +146,21 @@ function Trades({ start, mode }) {
 }
 
 const LIMITATIONS = [
+  ['Regras revisadas com este backtest', 'em nov/2026, o Deep Value passou a exigir cotação acima da média móvel de 200 pregões e a Qualidade a bom preço passou a exigir lucro estável. As regras foram escolhidas olhando só 2014 a 2019 e conferidas em 2020 até hoje, um período que não foi usado na escolha; selecione "Regras anteriores" para comparar. Mesmo assim, testamos cerca de 30 variações, então parte da diferença pode ser sorte'],
+  ['Número de ações', 'antes de 2020, vem do histórico do capital social no Formulário de Referência da CVM (aumentos, desdobramentos e grupamentos aprovados até cada data), sem descontar ações em tesouraria'],
   ['Sem olhar o futuro', 'em cada data, o ranking usa só os balanços já entregues à CVM (data de recebimento), cotações e proventos até o pregão anterior; as compras e vendas acontecem no fechamento'],
-  ['Viés de sobrevivência', 'empresas que saíram da bolsa e não têm histórico no Yahoo Finance não entram nos rankings do passado, o que tende a melhorar um pouco o resultado'],
+  ['Viés de sobrevivência', 'empresas que saíram da bolsa e não têm histórico no Yahoo Finance (cerca de um terço dos códigos desde 2014) não entram nos rankings do passado, o que tende a melhorar o resultado'],
   ['Cadastro atual', 'a situação na CVM (recuperação judicial) é a de hoje, valendo a partir da data de início informada; empresas que já saíram de uma recuperação podem ter entrado no ranking quando estavam nela'],
   ['Balanços refeitos', 'quando um balanço foi reapresentado, usamos a versão final com a data de entrega da primeira'],
   ['Custos', '0,1% por compra e por venda; sem imposto de renda nem taxa de custódia. Proventos reinvestidos (preço ajustado). Dinheiro parado rende o CDI'],
-  ['Rotação', 'nos primeiros pregões após 5/abr, 20/mai, 20/ago e 20/nov (depois dos prazos dos balanços), vende quem saiu do top 20 ou deixou de passar nos filtros e compra as mais bem colocadas que não estão na carteira'],
+  ['Rotação', 'nos primeiros pregões após 5/abr, 20/mai, 20/ago e 20/nov (depois dos prazos dos balanços), vende quem saiu do top 40 ou deixou de passar nos filtros e compra as mais bem colocadas que não estão na carteira de 20'],
 ];
 
 export default function BacktestView() {
   const { data, loading, error, retry } = useBacktest();
-  const [year, setYear] = useState(null);
+  const [periodId, setPeriodId] = useState(null);
   const [mode, setMode] = useState(MODES.rotation.id);
+  const [version, setVersion] = useState(VERSIONS.novas.id);
 
   if (error) {
     return (
@@ -174,47 +178,55 @@ export default function BacktestView() {
     );
   }
 
-  const start = data.inicios.find(s => s.ano === year) || data.inicios[0];
+  const start = data.periodos.find(p => p.id === periodId) || data.periodos[0];
+  const size = data.parametros?.size ?? 10;
+  const buffer = data.parametros?.buffer ?? 2 * size;
+  const robustness = (strategy) => (start.id === data.periodos[0].id ? data.robustez?.[strategy]?.[version]?.[mode] : null);
   const cdi = start.benchmarks.cdi;
   const ibov = start.benchmarks.ibov;
 
   return (
     <Stack spacing={{ xs: 3, md: 4 }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} flexWrap="wrap">
-        <ToggleButtonGroup exclusive size="small" value={start.ano} onChange={(e, v) => v && setYear(v)} aria-label="Início">
-          {data.inicios.map(s => <ToggleButton key={s.ano} value={s.ano}>Desde {s.ano}</ToggleButton>)}
+        <ToggleButtonGroup exclusive size="small" value={start.id} onChange={(e, v) => v && setPeriodId(v)} aria-label="Período">
+          {data.periodos.map(p => <ToggleButton key={p.id} value={p.id}>{p.label}</ToggleButton>)}
         </ToggleButtonGroup>
         <ToggleButtonGroup exclusive size="small" value={mode} onChange={(e, v) => v && setMode(v)} aria-label="Modo">
           {Object.values(MODES).map(m => <ToggleButton key={m.id} value={m.id}>{m.label}</ToggleButton>)}
+        </ToggleButtonGroup>
+        <ToggleButtonGroup exclusive size="small" value={version} onChange={(e, v) => v && setVersion(v)} aria-label="Regras">
+          {Object.values(VERSIONS).map(v => <ToggleButton key={v.id} value={v.id}>{v.label}</ToggleButton>)}
         </ToggleButtonGroup>
       </Stack>
 
       <Typography sx={{ fontSize: 18, maxWidth: '75ch' }}>
         De {formatDate(start.inicio)} a {formatDate(start.fim)}, o CDI rendeu <strong>{signedPercent(cdi.metricas.retorno)}</strong> e
-        o Ibovespa <strong>{signedPercent(ibov.metricas.retorno)}</strong>. Cada estratégia começou com as 10 primeiras do
-        ranking, com o mesmo peso{mode === 'rotation' ? ', e trocou a cada trimestre quem saiu do top 20' : ', sem nenhuma troca depois'}.
+        o Ibovespa <strong>{signedPercent(ibov.metricas.retorno)}</strong> ({signedPercent(cdi.metricas.retornoAnual)} e{' '}
+        {signedPercent(ibov.metricas.retornoAnual)} ao ano). Cada estratégia começou com as {size} primeiras do
+        ranking, com o mesmo peso{mode === 'rotation' ? `, e trocou a cada trimestre quem saiu do top ${buffer}` : ', sem nenhuma troca depois'}.
       </Typography>
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
-        {SERIES.map(s => start.estrategias[s.id] && (
-          <StrategyCard key={s.id} series={s} run={start.estrategias[s.id][mode]} cdi={cdi} />
+        {SERIES.map(s => runOf(start, s.id, version, mode) && (
+          <StrategyCard key={s.id} series={s} run={runOf(start, s.id, version, mode)} cdi={cdi} robustness={robustness(s.id)} />
         ))}
       </Box>
 
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 1.5 }}>
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1 }}>Retorno acumulado</Typography>
-        <EquityChart series={chartSeries(start, mode)} />
+        <EquityChart series={chartSeries(start, mode, version)} />
       </Paper>
 
       <Box>
         <Typography variant="h2" sx={{ fontSize: 28, mb: 1.5 }}>Ano a ano</Typography>
-        <YearlyTable start={start} mode={mode} />
+        <YearlyTable start={start} mode={mode} version={version} />
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
           Em negrito, os anos em que a estratégia bateu o CDI.
+          {start.id === data.periodos[0].id && ` "Inícios acima do CDI": de ${data.robustez?.anos?.length ?? 0} carteiras, uma começando em cada janeiro desde ${data.robustez?.anos?.[0] ?? ''} e mantida até hoje, quantas renderam mais que o CDI.`}
         </Typography>
       </Box>
 
-      <Trades start={start} mode={mode} />
+      <Trades start={start} mode={mode} version={version} />
 
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 1.5, bgcolor: tokens.paper }}>
         <Typography sx={{ fontWeight: 600, mb: 1 }}>Como o backtest foi feito e suas limitações</Typography>
