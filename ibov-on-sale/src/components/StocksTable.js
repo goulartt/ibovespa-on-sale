@@ -26,10 +26,10 @@ function Toolbar({ onExport }) {
   );
 }
 
-export default function StocksTable({ stocks, loading, hiddenColumns = [], visibleColumns = null, columnLabels }) {
+export default function StocksTable({ stocks, loading, hiddenColumns = [], visibleColumns = null, shownColumns = [], columnLabels }) {
   const fields = useMemo(() => withLabels(FIELDS, columnLabels), [columnLabels]);
   const columns = useMemo(() => buildColumns(fields), [fields]);
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS, hiddenColumns, visibleColumns));
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState(() => initialColumnVisibility(FIELDS, hiddenColumns, visibleColumns, shownColumns));
   const [sortModel, setSortModel] = useState([{ field: 'Ranking', sort: 'asc' }]);
   const [filterModel, setFilterModel] = useState({ items: [], quickFilterValues: [] });
   const [pageSize, setPageSize] = useState(25);

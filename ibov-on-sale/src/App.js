@@ -12,6 +12,7 @@ import StocksTable from './components/StocksTable';
 import Methodology from './components/Methodology';
 import SortSelector from './components/SortSelector';
 import SectorFilter, { ALL_SECTORS, filterBySector } from './components/SectorFilter';
+import BazinFilter, { filterByBazin } from './components/BazinFilter';
 import BacktestView from './components/BacktestView';
 import ValuationAssumptions from './components/ValuationAssumptions';
 import { BACKTEST_VIEW, STRATEGIES, viewFromHash } from './lib/strategies';
@@ -83,7 +84,9 @@ function Header({ updatedAt, view, onViewChange }) {
 function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
   const [sector, setSector] = useState(ALL_SECTORS);
   const { stocks, updatedAt, loading, error, retry } = useRanking(strategy.id, sort);
-  const allRows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
+  const [onlyBelowBazin, setOnlyBelowBazin] = useState(false);
+  const rankedRows = useMemo(() => stocks.map(withDerivedFields), [stocks]);
+  const allRows = useMemo(() => filterByBazin(rankedRows, onlyBelowBazin), [rankedRows, onlyBelowBazin]);
   const rows = useMemo(() => filterBySector(allRows, sector), [allRows, sector]);
   useEffect(() => { onUpdatedAt(updatedAt); }, [updatedAt, onUpdatedAt]);
 
@@ -101,6 +104,7 @@ function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
           <Stack spacing={2}>
             {!strategy.hideSort && <SortSelector value={sort} onChange={setSort} disabled={loading} />}
             {strategy.showAssumptions && <ValuationAssumptions />}
+            {!loading && strategy.bazinFilter && <BazinFilter stocks={rankedRows} value={onlyBelowBazin} onChange={setOnlyBelowBazin} />}
             {!loading && <SectorFilter stocks={allRows} value={sector} onChange={setSector} />}
           </Stack>
           {!loading && rows.length === 0 ? (
@@ -118,6 +122,7 @@ function RankingView({ strategy, sort, onSortChange: setSort, onUpdatedAt }) {
                   loading={loading}
                   hiddenColumns={strategy.hiddenColumns}
                   visibleColumns={strategy.visibleColumns}
+                  shownColumns={strategy.shownColumns}
                   columnLabels={strategy.columnLabels}
                 />
               </Paper>

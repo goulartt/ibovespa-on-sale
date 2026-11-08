@@ -8,7 +8,7 @@ const API_FIELDS = [
   'Ranking', 'Ativo', 'Empresa', 'Setor', 'Cotação', 'P/L', 'P/VP', 'PSR', 'Dividend Yield', 'P/EBIT', 'EV/EBIT',
   'Margem Ebit', 'Margem Líquida', 'ROE', 'Dívida Líquida/Patrimônio', 'Dívida Líquida/EBIT',
   'Liquidez Média Diária', 'Data Balanço', 'Situação', 'DY Médio 5 Anos', 'Payout', 'Anos com Dividendos',
-  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV', 'Instituição Financeira', 'Valor Intrínseco', 'Preço Teto', 'Margem de Segurança', 'Variação do Lucro', 'Desconto', 'ROE Médio', 'Payout Médio', 'Crescimento Esperado', 'Lucro Líquido', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
+  'ROIC', 'Lucros Anuais', 'Anos com Lucro', 'ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV', 'Instituição Financeira', 'Preço Teto Bazin', 'Desconto Bazin', 'Valor Intrínseco', 'Preço Teto', 'Margem de Segurança', 'Variação do Lucro', 'Desconto', 'ROE Médio', 'Payout Médio', 'Crescimento Esperado', 'Lucro Líquido', 'MA5', 'MA10', 'MA20', 'MMA50', 'MA100', 'MA200',
 ];
 
 describe('field metadata', () => {
@@ -90,4 +90,11 @@ test('the buy price is highlighted when the stock trades below it', () => {
   render(<div>{cell(10, 12)}</div>);
   expect(screen.getByTitle('Cotação abaixo do preço teto')).toHaveTextContent('R$ 12');
   expect(cell(15, 12)).toBe('R$ 12');
+});
+
+test('a strategy can show columns hidden by default', () => {
+  const visibility = initialColumnVisibility(FIELDS, ['ROCE'], null, ['Preço Teto Bazin']);
+  expect(visibility['Preço Teto Bazin']).toBeUndefined();
+  expect(visibility['Desconto Bazin']).toBe(false);
+  expect(visibility.ROCE).toBe(false);
 });

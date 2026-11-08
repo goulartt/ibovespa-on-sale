@@ -149,10 +149,13 @@ export function compareNullsLast(a, b) {
   return a - b;
 }
 
-// `visibleOnly` (a strategy's own column set) overrides the default hidden flags.
-export const initialColumnVisibility = (fields = FIELDS, extraHidden = [], visibleOnly = null) =>
+// `visibleOnly` (a strategy's own column set) overrides the default hidden flags;
+// `extraShown` shows columns that are hidden by default.
+export const initialColumnVisibility = (fields = FIELDS, extraHidden = [], visibleOnly = null, extraShown = []) =>
   Object.fromEntries(fields
-    .filter(f => (visibleOnly ? !visibleOnly.includes(f.field) : f.hidden || extraHidden.includes(f.field)))
+    .filter(f => (visibleOnly
+      ? !visibleOnly.includes(f.field)
+      : (f.hidden && !extraShown.includes(f.field)) || extraHidden.includes(f.field)))
     .map(f => [f.field, false]));
 
 // Strategy-specific header names, e.g. { 'Cotação': 'Valor atual' }.

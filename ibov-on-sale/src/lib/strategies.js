@@ -39,6 +39,7 @@ export const STRATEGIES = {
       ['Payout', 'a empresa distribui no máximo 120% do lucro dos últimos 12 meses; a folga acima de 100% cobre dividendos pagos agora sobre o lucro do ano anterior'],
       ['Lucro', 'lucro em todos os últimos balanços anuais (pelo menos 3) e nos últimos 12 meses, com margem EBIT positiva'],
       ['Endividamento', 'dívida líquida menor que 3 vezes o EBIT, ou 4,5 vezes em Energia e saneamento, setores de receita regulada que operam naturalmente mais alavancados'],
+      ['Preço teto de Bazin', 'dividendo médio por ação dos últimos 5 anos ÷ 6%, o rendimento mínimo que Décio Bazin exigia. Abaixo dele, os dividendos médios rendem mais de 6% ao ano sobre o preço pago. Use o filtro "Só abaixo do preço teto de Bazin" para ver apenas essas ações'],
     ],
     tag: {
       priceField: 'EV/EBIT',
@@ -46,7 +47,7 @@ export const STRATEGIES = {
       format: formatMultiple,
       lines: stock => [
         ['Dividend yield de', formatPercent(stock['Dividend Yield'])],
-        ['Média de 5 anos:', formatPercent(stock['DY Médio 5 Anos'])],
+        ['Preço teto Bazin:', formatCurrency(stock['Preço Teto Bazin'])],
       ],
     },
     summary: [
@@ -54,6 +55,8 @@ export const STRATEGIES = {
       ['EV/EBIT mediano', 'EV/EBIT', 'median', formatMultiple],
     ],
     hiddenColumns: ['ROCE', 'Dívida Líquida/EBITDA', 'EBIT/EV'],
+    shownColumns: ['Preço Teto Bazin', 'Desconto Bazin'],
+    bazinFilter: true,
   },
 
   qualidade: {

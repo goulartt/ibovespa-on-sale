@@ -138,3 +138,17 @@ test('the intrinsic value tab ranks by discount and shows the discount rate', as
   expect(screen.getAllByText('Preço teto:').length).toBeGreaterThan(0);
   expect(screen.queryByRole('button', { name: /Fórmula Mágica/ })).not.toBeInTheDocument();
 });
+
+test('the dividends tab can show only the stocks below the Bazin price ceiling', async () => {
+  fetchRanking.mockResolvedValue({
+    stocks: STOCKS.map((s, i) => ({ ...s, 'Preço Teto Bazin': i === 1 ? 10 : 30 })), // BBBB4 (R$ 20) is above
+    updatedAt: null,
+  });
+  window.history.replaceState(null, '', '#dividendos');
+  render(<App />);
+  await screen.findByRole('article', { name: '2º lugar: BBBB4' });
+
+  userEvent.click(screen.getByRole('checkbox', { name: /Só abaixo do preço teto de Bazin/ }));
+  expect(await screen.findByRole('article', { name: '2º lugar: CCCC3' })).toBeInTheDocument();
+  expect(screen.queryByRole('article', { name: /BBBB4/ })).not.toBeInTheDocument();
+});
